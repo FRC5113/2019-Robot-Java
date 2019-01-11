@@ -1,5 +1,7 @@
 package frc.subsystems;
 
+//import static org.junit.Assume.assumeTrue;
+
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
@@ -14,11 +16,12 @@ public class DriveTrain {
     // ^ these IDs are fake, replace them with the correct values
 
     public DriveTrain() {
-        
+        frontRight.setInverted(true);
+        backRight.setInverted(true);
     }
 
     public void driveCartesian(double xPower, double yPower, double rotation) {
-        mecDrive.driveCartesian(xPower, yPower, rotation);
+        mecDrive.driveCartesian(yPower, xPower, rotation);
     }
     
     public void drivePolar(double magnitude, double angle, double rotation) {
