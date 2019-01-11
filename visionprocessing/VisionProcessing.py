@@ -6,15 +6,16 @@ import logging
 import copy
 import FilterTests as ft
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(2)
 
 # Constants
 RESOLUTION = (cap.get(cv2.CAP_PROP_FRAME_WIDTH), cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-LOWER_THRESH = np.array([0, 0, 0])
-UPPER_THRESH = np.array([360, 255, 255])
+print(RESOLUTION[1])
+LOWER_THRESH = np.array([53, 81, 0])
+UPPER_THRESH = np.array([138, 215, 44])
 
 # Contour Test Constants
-Y_THRESH = [RESOLUTION[1] / 2, 200] # (y-center, range) or should I make it (lower, upper)?
+Y_THRESH = [96, 240] # (y-center, range) or should I make it (lower, upper)?
 RECT_TEST_TOLERANCE = 200
 VISION_TAPE_ANGLE = 14.5 * math.pi / 180 # radians
 MIN_SOLIDITY = 0.9

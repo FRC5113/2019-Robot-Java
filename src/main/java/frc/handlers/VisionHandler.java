@@ -22,6 +22,7 @@ public class VisionHandler {
             int distance = (int) nettab.getEntry("distance").getDouble(-1);
 
             target = new VisionTarget(xCoord, area, numTargetsFound, distance, X_RESOLUTION);
-        }
+        } else
+            System.out.println("No targets are found!");
     }
 }
