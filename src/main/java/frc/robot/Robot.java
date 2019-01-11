@@ -10,6 +10,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.TimedRobot;
 import frc.handlers.AutonHandler;
 import frc.handlers.JoystickHandler;
+import frc.handlers.VisionHandler;
 import frc.subsystems.DriveTrain;
 
 /**
@@ -24,6 +25,7 @@ public class Robot extends TimedRobot {
   private final JoystickHandler controls = new JoystickHandler();
   private final DriveTrain dt = new DriveTrain();
   private final AutonHandler ah = new AutonHandler(dt);
+  private VisionHandler vh = new VisionHandler();
 
   /**
    * This function is run when the robot is first started up and should be
@@ -46,6 +48,8 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
     // find out how to only run this when the robot is disabled:
     ah.disabledUpdate();
+    vh.updateVisionTarget();
+
   }
 
   /**
