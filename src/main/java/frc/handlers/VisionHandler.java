@@ -27,6 +27,7 @@ public class VisionHandler {
             target = new VisionTarget(xCoord, area, numTargetsFound, distance, X_RESOLUTION);
 
         }
+        
         System.out.println("Number of targets found: " + numTargetsFound);
     }
 }

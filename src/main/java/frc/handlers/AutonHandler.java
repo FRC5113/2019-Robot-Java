@@ -18,7 +18,7 @@ public class AutonHandler {
         SmartDashboard.putData("Auto choices", autonChooser);
 
         for(Case c : Case.values())
-        autonChooser.addObject(c.toString(), c.toString());
+        autonChooser.addOption(c.toString(), c.toString());
     }
 
     public void disabledUpdate() {
