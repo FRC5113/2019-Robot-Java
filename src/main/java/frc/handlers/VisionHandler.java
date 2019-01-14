@@ -4,14 +4,17 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class VisionHandler {
-    private final int X_RESOLUTION;
+    private int X_RESOLUTION;
 
     private NetworkTable nettab;
     private VisionTarget target;
     
     public VisionHandler() {
         nettab = NetworkTableInstance.getDefault().getTable("contoursReport");        
-    
+    }
+
+    public void updateVisionTarget()
+    {
         X_RESOLUTION = 100; // this will be changed to a resolution that is received from the network table
         
         int numTargetsFound = (int) nettab.getEntry("numTargetsFound").getDouble(-1);
@@ -22,7 +25,9 @@ public class VisionHandler {
             int distance = (int) nettab.getEntry("distance").getDouble(-1);
 
             target = new VisionTarget(xCoord, area, numTargetsFound, distance, X_RESOLUTION);
-        } else
-            System.out.println("No targets are found!");
+
+        }
+        
+        System.out.println("Number of targets found: " + numTargetsFound);
     }
 }
