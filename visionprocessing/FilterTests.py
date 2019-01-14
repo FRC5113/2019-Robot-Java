@@ -10,30 +10,14 @@ def solidityTest(contourArea, convexHull, minSolidity):
     hullArea = cv2.contourArea(convexHull)
     return float(contourArea / hullArea) >= minSolidity
 
-def aspectRatioTest(rectWidth, rectHeight, desiredRatio, tolerance, angle=0): # desiredRatio = width/height, e.g. 4:3 becomes 4/3
-    b, h = getBH(rectWidth, rectHeight, angle)
-
-    ratio = b / h
-
-    return math.fabs(ratio - desired_radio) < tolerance
-
 def quadrilateralTest(contour, tolerance, numSides=4): # numSides can be a different integer to find polygons of alternate side counts (e.g. 5 for pentagon)
-    epsilon = 0
-
-    while epsilon < tolerance:
-        epsilon += 1
+    for epsilon in range(1, tolerance):
         approx = cv2.approxPolyDP(contour, epsilon, True)
 
-        if len(approx) == numSides and epsilon < tolerance:
+        if len(approx) == numSides:
             return True
 
     return False
-
-def getBH(rectWidth, rectHeight, angle):
-    b = rectHeight / math.cos(angle)
-    h = rectWidth * math.cos(angle)
-
-    return b, h
 
 def parallaxCorrection(contour, pointsDestination, delete):
     left, right, top, bottom = getExtremePoints(contour)
