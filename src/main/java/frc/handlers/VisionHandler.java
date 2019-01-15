@@ -39,9 +39,13 @@ public class VisionHandler {
     }
 
     public String toString() {
-        String str = String.format("xCoord: %d\n" +
+        String str;
+        if(target != null)
+            str = String.format("xCoord: %d\n" +
                                    "distance: %d",
                                    target.getXCoord(), target.getDistance());
+        else
+            str = "no target";
         return str;
     }
 }

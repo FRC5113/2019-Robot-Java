@@ -12,7 +12,7 @@ import os
 
 os.system('sh cameraconfig.sh') # This sets certain parameters for the camera such as disabling autoexposure, setting exposure, etc.
 CONFIG = ch.getConfig('vision_processing.cfg') # This allows us to define constants from a configuration file,
-												# rather than in the code
+                                                                                                # rather than in the code
 cap = cv2.VideoCapture(CONFIG['camera']) # defines our camera
 
 # Constants
@@ -49,7 +49,7 @@ if not CONFIG['offline']:
         if not notified[0]:
             cond.wait()
 
-	table.putNumber('X_RESOLUTION', RESOLUTION[0])
+        table.putNumber('X_RESOLUTION', RESOLUTION[0])
 ##########################################################################
 
 ########### This is only used for finding new values #####################
@@ -109,7 +109,7 @@ while True:
         contourArea = cv2.contourArea(contour)
         convexHull = cv2.convexHull(contour)
 
-	# The "or not CONFIG['test']" line allows us to override the boolean in the config file
+        # The "or not CONFIG['test']" line allows us to override the boolean in the config file
         yLevelTest = not CONFIG['y-levelTest'] or ft.ylevelTest(rectY, Y_TEST_THRESH)
         solidityTest =  not CONFIG['solidityTest']or ft.solidityTest(contourArea, convexHull, MIN_SOLIDITY)
         quadrilateralTest = not CONFIG['quadrilateralTest'] or ft.quadrilateralTest(contour, 11)
@@ -127,31 +127,31 @@ while True:
     ######################################################################
 
     ############## Send Contours #########################################
-	if len(filteredContours) < 2:
-		table.putBoolean('targetDetected', False)
-	else:
-		'''
-		If we have more than two filtered contours, overwrite the filteredContours
-		array with the largest two contours
-		'''
-		if len(filteredContours) > 2:
-			largestContour = {'contour': filteredContours[0], 'area': cv2.contourArea(filteredContours[0])}
-			largestContour2 = {'contour': filteredContours[1], 'area': cv2.contourArea(filteredContours[1])}
+    if len(filteredContours) < 2:
+            table.putBoolean('targetDetected', False)
+    else:
+        '''
+        If we have more than two filtered contours, overwrite the filteredContours
+        array with the largest two contours
+        '''
+        if len(filteredContours) > 2:
+                largestContour = {'contour': filteredContours[0], 'area': cv2.contourArea(filteredContours[0])}
+                largestContour2 = {'contour': filteredContours[1], 'area': cv2.contourArea(filteredContours[1])}
 
-			for i in range(2, len(filteredContours)):
-				area = cv2.contourArea(filteredContours[i])
+                for i in range(2, len(filteredContours)):
+                        area = cv2.contourArea(filteredContours[i])
 
-				if area > largestContour['area']:
-					largestContour = {'contour': filteredContours[i], 'area': area}
-				elif area > largestContour2['area']:
-					largestContour2 = {'contour': filteredContours[i], 'area': area}
+                        if area > largestContour['area']:
+                                largestContour = {'contour': filteredContours[i], 'area': area}
+                        elif area > largestContour2['area']:
+                                largestContour2 = {'contour': filteredContours[i], 'area': area}
 
-			filteredContours = [largestContour, largestContour2]
+                filteredContours = [largestContour['contour'], largestContour2['contour']]
 
-		'''
-		Now that we have ensured that there are only two found contours, we send
-		relevant data to the roboRIO.
-		'''
+        '''
+        Now that we have ensured that there are only two found contours, we send
+        relevant data to the roboRIO.
+        '''
         x1, y1, width1, height1 = cv2.boundingRect(filteredContours[0])
         x2, y2, width2, height2 = cv2.boundingRect(filteredContours[1])
 
@@ -164,7 +164,7 @@ while True:
 
         distance = CONFIG['VT_HEIGHT'] * CONFIG['FOCAL_RANGE'] / ((height1 + height2) / 2)
 
-		table.putBoolean('targetDetected', True)
+        table.putBoolean('targetDetected', True)
         table.putNumber('xCoord', (x1 + x2) / 2)
         table.putNumber('distance', distance)
     ######################################################################
