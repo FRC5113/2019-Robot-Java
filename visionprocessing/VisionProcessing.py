@@ -127,37 +127,46 @@ while True:
     ######################################################################
 
     ############## Send Contours #########################################
-    # middle coordinate, area, number of targets found (0, 1, or 2),
-    # and the distance to the target.
+	if len(filteredContours) < 2:
+		table.putBoolean('targetDetected', False)
+	else:
+		'''
+		If we have more than two filtered contours, overwrite the filteredContours
+		array with the largest two contours
+		'''
+		if len(filteredContours) > 2:
+			largestContour = {'contour': filteredContours[0], 'area': cv2.contourArea(filteredContours[0])}
+			largestContour2 = {'contour': filteredContours[1], 'area': cv2.contourArea(filteredContours[1])}
 
-	# I want to implement an algorithm to combine the vision targets into a single
-	# "vision target" that is a single object on the Java side.
+			for i in range(2, len(filteredContours)):
+				area = cv2.contourArea(filteredContours[i])
 
+				if area > largestContour['area']:
+					largestContour = {'contour': filteredContours[i], 'area': area}
+				elif area > largestContour2['area']:
+					largestContour2 = {'contour': filteredContours[i], 'area': area}
 
-    if len(filteredContours) == 2:
+			filteredContours = [largestContour, largestContour2]
+
+		'''
+		Now that we have ensured that there are only two found contours, we send
+		relevant data to the roboRIO.
+		'''
         x1, y1, width1, height1 = cv2.boundingRect(filteredContours[0])
         x2, y2, width2, height2 = cv2.boundingRect(filteredContours[1])
 
-        if x1 < x2:
-            leftTarget = filteredContours[0]
-            rightTarget = filteredContours[1]
-        else:
-            leftTarget = filteredContours[1]
-            rightTarget = filteredContours[0]
+        # if x1 < x2:
+        #     leftTarget = filteredContours[0]
+        #     rightTarget = filteredContours[1]
+        # else:
+        #     leftTarget = filteredContours[1]
+        #     rightTarget = filteredContours[0]
 
         distance = CONFIG['VT_HEIGHT'] * CONFIG['FOCAL_RANGE'] / ((height1 + height2) / 2)
 
+		table.putBoolean('targetDetected', True)
         table.putNumber('xCoord', (x1 + x2) / 2)
         table.putNumber('distance', distance)
-    elif len(filteredContours) == 1:
-        print('unimplemented')
-    elif len(filteredContours) == 0:
-        print('no contours found')
-    else:
-        print('too many contours found')
-
-    if not CONFIG['offline']:
-        table.putNumber('numTargetsFound', len(filteredContours))
     ######################################################################
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break

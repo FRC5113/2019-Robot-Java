@@ -49,7 +49,7 @@ public class Robot extends TimedRobot {
     // find out how to only run this when the robot is disabled:
     ah.disabledUpdate();
     vh.updateVisionTarget();
-
+    System.out.println(vh.toString());
   }
 
   /**

@@ -1,16 +1,15 @@
 package frc.handlers;
 
 public class VisionTarget {
-	private final int xCoord, area, distance;
+	private final int xCoord, distance;
 	private final Zone zone; // the screen is evenly cut into three vertical zones
 
     public enum Zone {
-        LEFT, CENTER, RIGHT, UNDEFINED;
+        LEFT, CENTER, RIGHT;
     }
 	
-	public VisionTarget(int xCoord, int area, int distance, int X_RESOLUTION) {
+	public VisionTarget(int xCoord, int distance, int X_RESOLUTION) {
 		this.xCoord = xCoord;
-		this.area = area;
 		this.distance = distance;
 
 		if(xCoord <= X_RESOLUTION / 2)
@@ -23,10 +22,6 @@ public class VisionTarget {
 
 	public int getXCoord() {
 		return xCoord;
-	}
-
-	public int getArea() {
-		return area;
 	}
 
 	public int getDistance() {
