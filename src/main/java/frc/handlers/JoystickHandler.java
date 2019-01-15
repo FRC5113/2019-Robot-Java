@@ -10,6 +10,8 @@ public class JoystickHandler {
     private final JoystickButton left, right, forward, reverse;
     private final JoystickButton useJoystick, slow;
 
+    private final JoystickButton useVisionRecognition;
+
     public JoystickHandler() {
         driverStick = new Joystick(0);
 
@@ -20,13 +22,19 @@ public class JoystickHandler {
         
         useJoystick = new JoystickButton(driverStick, 12);
         slow = new JoystickButton(driverStick, 11);
+
+        useVisionRecognition = new JoystickButton(driverStick, 8);
     }
 
-    public void enabledUpdate(DriveTrain dt) {
+    public void enabledUpdate(DriveTrain dt, VisionHandler vh) {
         double power = slow.get()? 0.15 : 0.5;
 
         if(useJoystick.get())
             dt.driveCartesian(driverStick.getX(), driverStick.getY() * -1, Math.abs(driverStick.getZ()) > 0.25? driverStick.getZ() : 0);
+        else if(useVisionRecognition.get()) {
+            vh.updateVisionTarget();
+            vh.update(dt);
+        }
         else {
             if(left.get())
                 dt.driveCartesian(-power, 0, 0);

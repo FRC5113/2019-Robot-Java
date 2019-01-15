@@ -14,13 +14,13 @@ public class PlaceHatchPanel {
 	public boolean update(DriveTrain dt) {
 		switch(target.getZone()) {
 		case LEFT:
-			dt.drivePolar(0.5, Direction.FORWARD_LEFT, 0);
+			dt.drivePolar(0, Direction.FORWARD_LEFT, -0.1);
 			break;
 		case CENTER:
-			dt.drivePolar(0.5, Direction.FORWARD, 0);
+			dt.drivePolar(0.15, Direction.FORWARD, 0);
 			break;
 		case RIGHT:
-			dt.drivePolar(0.5, Direction.FORWARD_RIGHT, 0);
+			dt.drivePolar(0, Direction.FORWARD_RIGHT, 0.1);
 			break;
 		case UNDEFINED:
 			System.out.println("Can't find target!");
@@ -28,5 +28,10 @@ public class PlaceHatchPanel {
 		}
 
 		return false;
+	}
+
+	public boolean update(DriveTrain dt, VisionTarget newTarget) {
+		target = newTarget;
+		return update(dt);
 	}
 }

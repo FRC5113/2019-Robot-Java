@@ -83,7 +83,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
-    controls.enabledUpdate(dt);
+    controls.enabledUpdate(dt, vh);
   }
 
   /**

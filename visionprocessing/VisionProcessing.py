@@ -17,6 +17,7 @@ cap = cv2.VideoCapture(CONFIG['camera']) # defines our camera
 
 # Constants
 RESOLUTION = (cap.get(cv2.CAP_PROP_FRAME_WIDTH), cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+VT_HEIGHT = CONFIG['VT_HEIGHT']
 LOWER_THRESH = np.array(CONFIG['LOWER_THRESH'])
 UPPER_THRESH = np.array(CONFIG['UPPER_THRESH'])
 #LOWER_THRESH = np.array([178, 190, 128])
@@ -26,13 +27,6 @@ UPPER_THRESH = np.array(CONFIG['UPPER_THRESH'])
 Y_TEST_THRESH = CONFIG['Y_TEST_THRESH']
 MIN_SOLIDITY = CONFIG['MIN_SOLIDITY']
 VISION_TAPE_ANGLE = 14.5 * math.pi / 180 # radians
-
-# Network Tables
-if not CONFIG['offline']:
-    nettab.setClientMode()
-    nettab.initialize(server='roborio-5113-frc.local')
-    table = nettab.getTable('contoursReport')
-    table.putNumber('x_resolution', RESOLUTION[0])
 
 ########### Connects RaspberryPi to roboRIO ##############################
 # copied from here: https://robotpy.readthedocs.io/en/stable/guide/nt.html#client-initialization-driver-station-coprocessor
@@ -54,6 +48,8 @@ if not CONFIG['offline']:
         print("Waiting")
         if not notified[0]:
             cond.wait()
+
+	table.putNumber('X_RESOLUTION', RESOLUTION[0])
 ##########################################################################
 
 ########### This is only used for finding new values #####################
@@ -133,6 +129,33 @@ while True:
     ############## Send Contours #########################################
     # middle coordinate, area, number of targets found (0, 1, or 2),
     # and the distance to the target.
+
+	# I want to implement an algorithm to combine the vision targets into a single
+	# "vision target" that is a single object on the Java side.
+
+
+    if len(filteredContours) == 2:
+        x1, y1, width1, height1 = cv2.boundingRect(filteredContours[0])
+        x2, y2, width2, height2 = cv2.boundingRect(filteredContours[1])
+
+        if x1 < x2:
+            leftTarget = filteredContours[0]
+            rightTarget = filteredContours[1]
+        else:
+            leftTarget = filteredContours[1]
+            rightTarget = filteredContours[0]
+
+        distance = CONFIG['VT_HEIGHT'] * CONFIG['FOCAL_RANGE'] / ((height1 + height2) / 2)
+
+        table.putNumber('xCoord', (x1 + x2) / 2)
+        table.putNumber('distance', distance)
+    elif len(filteredContours) == 1:
+        print('unimplemented')
+    elif len(filteredContours) == 0:
+        print('no contours found')
+    else:
+        print('too many contours found')
+
     if not CONFIG['offline']:
         table.putNumber('numTargetsFound', len(filteredContours))
     ######################################################################
