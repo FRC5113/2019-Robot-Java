@@ -16,6 +16,7 @@ public class VisionHandler {
     public VisionHandler() {
         nettab = NetworkTableInstance.getDefault().getTable("contoursReport");   
         X_RESOLUTION = (int) nettab.getEntry("X_RESOLUTION").getDouble(-1);
+        hatchAuton = new PlaceHatchPanel(null);
     }
 
     public void updateVisionTarget()
@@ -40,12 +41,14 @@ public class VisionHandler {
 
     public String toString() {
         String str;
+
         if(target != null)
-            str = String.format("xCoord: %d\n" +
-                                   "distance: %d",
-                                   target.getXCoord(), target.getDistance());
+            str = String.format("xCoord: %d (/%d)\n" +
+                                   "angle: %d",
+                                   target.getXCoord(), X_RESOLUTION, target.getAngle());
         else
             str = "no target";
+            
         return str;
     }
 }

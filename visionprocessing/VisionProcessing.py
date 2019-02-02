@@ -7,26 +7,31 @@ import threading
 import FilterTests as ft
 import ConfigHandler as ch
 import os
+import copy
 
 # The general loop of this file is explained here: https://docs.opencv.org/3.0-beta/doc/py_tutorials/py_gui/py_video_display/py_video_display.html
 
 os.system('sh cameraconfig.sh') # This sets certain parameters for the camera such as disabling autoexposure, setting exposure, etc.
+
 CONFIG = ch.getConfig('vision_processing.cfg') # This allows us to define constants from a configuration file,
                                                                                                 # rather than in the code
 cap = cv2.VideoCapture(CONFIG['camera']) # defines our camera
+#cap = cv2.VideoCapture('footage.avi')
 
 # Constants
 RESOLUTION = (cap.get(cv2.CAP_PROP_FRAME_WIDTH), cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+RESOLUTION = (640, 360)
 VT_HEIGHT = CONFIG['VT_HEIGHT']
 LOWER_THRESH = np.array(CONFIG['LOWER_THRESH'])
 UPPER_THRESH = np.array(CONFIG['UPPER_THRESH'])
 #LOWER_THRESH = np.array([178, 190, 128])
 #UPPER_THRESH = np.array([246, 247, 242])
-
+ANGLE_CALIBRATION = 0
 # Contour Test Constants
 Y_TEST_THRESH = CONFIG['Y_TEST_THRESH']
 MIN_SOLIDITY = CONFIG['MIN_SOLIDITY']
-VISION_TAPE_ANGLE = 14.5 * math.pi / 180 # radians
+MIN_AREA = CONFIG['MIN_AREA']
+SUPER_STRICT_TEST_TOLERANCE = CONFIG['SUPER_STRICT_TEST_TOLERANCE']
 
 ########### Connects RaspberryPi to roboRIO ##############################
 # copied from here: https://robotpy.readthedocs.io/en/stable/guide/nt.html#client-initialization-driver-station-coprocessor
@@ -36,7 +41,7 @@ def connectionListener(connected, info):
         notified[0] = True
         cond.notify()
 
-if not CONFIG['offline']:
+if not CONFIG['OFFLINE']:
     cond = threading.Condition()
     notified = [False]
 
@@ -66,6 +71,8 @@ cv2.createTrackbar('V', 'threshold_tester', UPPER_THRESH[2], 255, nothing)
 cv2.createTrackbar('y-level[0]', 'threshold_tester', int(Y_TEST_THRESH[0]), int(RESOLUTION[1]), nothing)
 cv2.createTrackbar('y-level[1]', 'threshold_tester', int(Y_TEST_THRESH[1]), int(RESOLUTION[1] / 2), nothing)
 cv2.createTrackbar('solidity', 'threshold_tester', int(MIN_SOLIDITY * 100), 100, nothing)
+cv2.createTrackbar('circle tolerance', 'threshold_tester', SUPER_STRICT_TEST_TOLERANCE, 100, nothing)
+cv2.createTrackbar('areaTest', 'threshold_tester', MIN_AREA, 1000, nothing)
 ##########################################################################
 
 while True:
@@ -80,10 +87,13 @@ while True:
     Y_TEST_THRESH[1] = cv2.getTrackbarPos('y-level[1]', 'threshold_tester')
     RECT_TEST_TOLERANCE = cv2.getTrackbarPos('rect-tolerance', 'threshold_tester')
     MIN_SOLIDITY = cv2.getTrackbarPos('solidity', 'threshold_tester') / 100
+    SUPER_STRICT_TEST_TOLERANCE = cv2.getTrackbarPos('circle tolerance', 'threshold_tester')
+    MIN_AREA = cv2.getTrackbarPos('areaTest', 'threshold_tester')
     ######################################################################
 
     ### Save new frame ###
     ret, frame = cap.read()
+    unmodified = copy.copy(frame)
 
     ############## Process Image #########################################
     ### Threshold image ###
@@ -91,7 +101,7 @@ while True:
 
     ### Dilate image ###
     kernel = np.ones((5, 5), np.uint8) # This is a line copied from OpenCV's website. It establishes the size of the dilation
-    dilatedImage = cv2.dilate(thresholdedImage, kernel, iterations = 2) # change number of iterations to dilate fupallerther
+    dilatedImage = cv2.dilate(thresholdedImage, kernel, iterations = 1) # change number of iterations to dilate fupallerther
     ######################################################################
 
     ############## Get & Filter Contours #################################
@@ -110,66 +120,148 @@ while True:
         convexHull = cv2.convexHull(contour)
 
         # The "or not CONFIG['test']" line allows us to override the boolean in the config file
-        yLevelTest = not CONFIG['y-levelTest'] or ft.ylevelTest(rectY, Y_TEST_THRESH)
+        yLevelTest = not CONFIG['y-levelTest'] or ft.ylevelTest(rectY + rectHeight / 2, Y_TEST_THRESH)
         solidityTest =  not CONFIG['solidityTest']or ft.solidityTest(contourArea, convexHull, MIN_SOLIDITY)
-        quadrilateralTest = not CONFIG['quadrilateralTest'] or ft.quadrilateralTest(contour, 11)
+        quadrilateralTest = not CONFIG['quadrilateralTest'] or ft.quadrilateralTest(contour, 13)
+        areaTest = not CONFIG['areaTest'] or ft.areaTest(contourArea, MIN_AREA)
 
-        if yLevelTest and solidityTest and quadrilateralTest:
+        if yLevelTest and solidityTest and quadrilateralTest and areaTest:
+            print(contourArea)
             filteredContours.append(contour)
     ######################################################################
 
-    ############## Show All Images #######################################
-    contourImage = cv2.drawContours(frame, filteredContours, -1, (0, 0, 255), 2)
+    ############## Determine Targets #########################################
+    targets = []
 
-    cv2.imshow('thresholded', thresholdedImage)
-    cv2.imshow('dilated', dilatedImage)
-    cv2.imshow('contours', contourImage)
-    ######################################################################
-
-    ############## Send Contours #########################################
     if len(filteredContours) < 2:
+        if not CONFIG['OFFLINE']:
             table.putBoolean('targetDetected', False)
     else:
-        '''
-        If we have more than two filtered contours, overwrite the filteredContours
-        array with the largest two contours
-        '''
-        if len(filteredContours) > 2:
-                largestContour = {'contour': filteredContours[0], 'area': cv2.contourArea(filteredContours[0])}
-                largestContour2 = {'contour': filteredContours[1], 'area': cv2.contourArea(filteredContours[1])}
+        # Determine vision target:
+        
+        for i in range(len(filteredContours[:-1])):
+            contour = filteredContours[i]
+            for j in range(i+1, len(filteredContours)):
+                '''
+                This portion finds four points of the vision target, and uses them to
+                warp the perspective so that the image looks as if the camera were
+                directly in front of the target. This allows us to make sure that
+                we are really looking at a vision target, and not some random contour.
+                '''
+                
+                contour2 = filteredContours[j]
 
-                for i in range(2, len(filteredContours)):
-                        area = cv2.contourArea(filteredContours[i])
+                rect1 = cv2.minAreaRect(contour)
+                rect2 = cv2.minAreaRect(contour2)
+                rect1, rect2 = np.asarray(cv2.boxPoints(rect1)), np.asarray(cv2.boxPoints(rect2))
+                
+                if rect1[0][0] < rect2[0][0]:
+                    leftTarget = rect1
+                    rightTarget = rect2
+                else:
+                    leftTarget = rect2
+                    rightTarget = rect1
+    
+                # [topLeft, topRight, bottomRight, bottomLeft]
+                leftTargetVerticies = [[leftTarget[0][0], leftTarget[0][1]]] * 4
+                rightTargetVerticies = [[rightTarget[0][0], rightTarget[0][1]]] * 4
+    
+                for point in leftTarget:
+                    if point[1] < leftTargetVerticies[0][1]:
+                        leftTargetVerticies[0] = point
+                    if point[0] > leftTargetVerticies[1][0]:
+                        leftTargetVerticies[1] = point
+                    if point[1] > leftTargetVerticies[2][1]:
+                        leftTargetVerticies[2] = point
+                    if point[0] < leftTargetVerticies[3][0]:
+                        leftTargetVerticies[3] = point
+    
+                for point in rightTarget:
+                    point = [point[0], point[1]]
+                    if point[0] < rightTargetVerticies[0][0]:
+                        rightTargetVerticies[0] = point
+                    if point[1] < rightTargetVerticies[1][1]:
+                        rightTargetVerticies[1] = point
+                    if point[0] > rightTargetVerticies[2][0]:
+                        rightTargetVerticies[2] = point
+                    if point[1] > rightTargetVerticies[3][1]:
+                        rightTargetVerticies[3] = point
+    
+                srcPoints = np.asarray([leftTargetVerticies[0], rightTargetVerticies[1], rightTargetVerticies[2], leftTargetVerticies[3]])
+                destPoints = np.asarray(CONFIG['DEST_POINTS'])
+    
+                h, mask = cv2.findHomography(srcPoints, destPoints, cv2.RANSAC, 5)
+                
+                warped = cv2.warpPerspective(frame, h, (int(RESOLUTION[0]), int(RESOLUTION[1])))
+                warpedPoints = cv2.perspectiveTransform(np.array([leftTargetVerticies, rightTargetVerticies], dtype='float32'), h)
+    
+                warpedLeft = warpedPoints[0].astype(int)
+                warpedRight = warpedPoints[1].astype(int)
+    
+                #ctr = np.array(srcPoints).reshape((-1,1,2)).astype(np.int32) # this line is copied from https://stackoverflow.com/questions/14161331/creating-your-own-contour-in-opencv-using-python
+                #cv2.drawContours(frame, [ctr], -1, (255, 0, 0), 2)
+                cv2.drawContours(warped, [warpedLeft, warpedRight], -1, (255, 0, 0), 2)
+                #cv2.imshow('warped', warped)
+    
+                if ft.superStrictTest(warpedLeft, warpedRight, CONFIG['SUPER_STRICT_TEST_POINTS'], SUPER_STRICT_TEST_TOLERANCE):
+                    x1, y1, w1, h1 = cv2.boundingRect(contour)
+                    x2, y2, w2, h2 = cv2.boundingRect(contour2)
+                    centerX = (x1 + w1 / 2 + x2 + w2 / 2) / 2
 
-                        if area > largestContour['area']:
-                                largestContour = {'contour': filteredContours[i], 'area': area}
-                        elif area > largestContour2['area']:
-                                largestContour2 = {'contour': filteredContours[i], 'area': area}
+                    theta = 90 - math.atan2(h[1,1], h[1,0]) * 180 / math.pi # copied from answers.opencv.org/question/203890/how-to-find-rotation-angle-from-homography-matrix/
+                    theta -= ANGLE_CALIBRATION
+                    targets.append({'contours': [contour, contour2], 'x': centerX, 'angle': theta})
 
-                filteredContours = [largestContour['contour'], largestContour2['contour']]
+                    print(theta)
+    
+                cv2.drawContours(frame, filteredContours, -1, (0, 0, 255), 2)
+    
+                print('-----------------------------------------------')
+    
+    # Now we have our targets!
+    # Let's select the target closest to the center. We may change how we select targets in the future
 
-        '''
-        Now that we have ensured that there are only two found contours, we send
-        relevant data to the roboRIO.
-        '''
-        x1, y1, width1, height1 = cv2.boundingRect(filteredContours[0])
-        x2, y2, width2, height2 = cv2.boundingRect(filteredContours[1])
+    if len(targets) > 0:
+        selectedTarget = targets[0]
+        
+        for target in targets:
+            if math.fabs(target['x'] - RESOLUTION[0] / 2) < math.fabs(selectedTarget['x'] - RESOLUTION[0]):
+                selectedTarget = target
+    else:
+        selectedTarget = None
 
-        # if x1 < x2:
-        #     leftTarget = filteredContours[0]
-        #     rightTarget = filteredContours[1]
-        # else:
-        #     leftTarget = filteredContours[1]
-        #     rightTarget = filteredContours[0]
-
-        distance = CONFIG['VT_HEIGHT'] * CONFIG['FOCAL_RANGE'] / ((height1 + height2) / 2)
-
-        table.putBoolean('targetDetected', True)
-        table.putNumber('xCoord', (x1 + x2) / 2)
-        table.putNumber('distance', distance)
+    if selectedTarget != None:
+        cv2.drawContours(frame, selectedTarget['contours'], -1, (0, 255, 0), 2)
     ######################################################################
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+
+    ########################## Send Data #################################
+    #distance = CONFIG['VT_HEIGHT'] * CONFIG['FOCAL_RANGE'] / ((height1 + height2) / 2)
+    
+    if not CONFIG['OFFLINE']:
+        if selectedTarget != None:
+            table.putBoolean('targetDetected', True)
+            table.putNumber('xCoord', selectedTarget['x'])
+            table.putNumber('angle', selectedTarget['angle'])
+        else:
+            table.putBoolean('targetDetected', False)
+    ######################################################################
+
+    ############## Show All Images #######################################
+    cv2.rectangle(frame, (0, int(Y_TEST_THRESH[0] - Y_TEST_THRESH[1] / 2)), (int(RESOLUTION[0]), Y_TEST_THRESH[0] + Y_TEST_THRESH[1]), (0, 255, 255), 2)
+
+    #cv2.imshow('thresholded', thresholdedImage)
+    #cv2.imshow('dilated', dilatedImage)
+    cv2.imshow('contours', frame)
+    #cv2.imshow('unmodified', unmodified)
+    ######################################################################
+
+    print('========================================================')
+
+    key = cv2.waitKey(1)
+    if key & 0xFF == ord('q'):
         break
+    elif key & 0xFF == ord('c'):
+        ANGLE_CALIBRATION += selectedTarget['angle']
 
 cap.release()
 cv2.destroyAllWindows()

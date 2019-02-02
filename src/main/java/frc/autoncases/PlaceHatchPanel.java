@@ -4,6 +4,7 @@ import frc.handlers.VisionTarget;
 import frc.subsystems.DriveTrain;
 
 public class PlaceHatchPanel {
+	private final int ANGLE_TOLERANCE = 3;
 	private VisionTarget target;
 
 	public PlaceHatchPanel(VisionTarget target) {
@@ -14,25 +15,29 @@ public class PlaceHatchPanel {
 	public boolean update(DriveTrain dt) {
 		if(target == null) {
 			System.out.println("No target found!!!!");
-			return false;
-		} else if(target.getDistance() > 6) {
-			switch(target.getZone()) {
-			case LEFT:
-				dt.drivePolar(0, Direction.FORWARD_LEFT, -0.1);
-				break;
-			case CENTER:
-				dt.drivePolar(0.15, Direction.FORWARD, 0);
-				break;
-			case RIGHT:
-				dt.drivePolar(0, Direction.FORWARD_RIGHT, 0.1);
-				break;
-			}
-			
-			return false;
+			dt.driveCartesian(0, 0, 0);
+		} else if (target.getAngle() < -ANGLE_TOLERANCE) {
+			dt.driveCartesian(0.3, 0, 0.15);
+		} else if (target.getAngle() > ANGLE_TOLERANCE) {
+			dt.driveCartesian(-0.3, 0, -0.15);
 		} else {
-			dt.drivePolar(0, 0, 0);
-			return true;
+			if(true) { // get distance from lidar and make sure it is at least like 15 or something
+				switch(target.getZone()) {
+				case LEFT:
+					dt.drivePolar(0, Direction.LEFT, 0);
+					break;
+				case CENTER:
+					return true;
+				case RIGHT:
+					dt.drivePolar(0, Direction.RIGHT, 0);
+					break;
+				}
+			} else {
+				return true;
+			}
 		}
+
+		return false;
 	}
 
 	public boolean update(DriveTrain dt, VisionTarget newTarget) {

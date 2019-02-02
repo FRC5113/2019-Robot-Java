@@ -19,16 +19,25 @@ def quadrilateralTest(contour, tolerance, numSides=4): # numSides can be a diffe
 
     return False
 
-def parallaxCorrection(contour, pointsDestination, delete):
-    left, right, top, bottom = getExtremePoints(contour)
+def areaTest(contourArea, minArea):
+    return contourArea > minArea
 
-    pointsSource = np.array([left, right, top, bottom])
-    h, status = cv2.findHomography(pointsSource, pointsDestination)
+'''
+This is a test specific to the 2019 season. Given eight points
+(the corners of the two vision targets), make sure that the
+points are within a certain radius of where they should be
+if they are actually a vision target.
+'''
+def superStrictTest(rect1, rect2, destPoints, tolerance):
+    for i in range(4):
+        if not withinRadius(rect1[i], destPoints[i], tolerance):
+            return False
 
-def getExtremePoints(contour): # returns in order left, right, top, buttom
-    left = tuple(contour[contour[:,:,0].argmin()][0])
-    right = tuple(contour[contour[:,:,0].argmax()][0])
-    top = tuple(contour[contour[:,:,1].argmin()][0])
-    bottom = tuple(contour[contour[:,:,1].argmax()][0])
+    for i in range(4):
+        if not withinRadius(rect2[i], destPoints[4+i], tolerance):
+            return False
 
-    return left, right, top, bottom
+    return True
+
+def withinRadius(point, center, radius):
+    return math.sqrt(math.pow(point[0] - center[0], 2) + math.pow(point[1] - center[1], 2)) < radius # distance formula
