@@ -13,43 +13,55 @@ public class JoystickHandler {
     private final double DRIVE_THRESHOLD = 0.1;
     private final double xCalibration, yCalibration, zCalibration;
 
+    private final JoystickButton useVisionRecognition;
+
     public JoystickHandler() {
         xCalibration = xboxDriver.getX(Hand.kLeft);
         yCalibration = xboxDriver.getY(Hand.kLeft);
         zCalibration = xboxDriver.getX(Hand.kRight);
+
+        useVisionRecognition = new JoystickButton(driverStick, 8);
     }
 
-    public void enabledUpdate(DriveTrain dt, HatchIntake hi, CargoIntake ci, Climber cb, Elevator el) {
-        double xAxis = Math.abs(xboxDriver.getX(Hand.kLeft) - xCalibration) > DRIVE_THRESHOLD? xboxDriver.getX(Hand.kLeft) : 0;
-        double yAxis = Math.abs(xboxDriver.getY(Hand.kLeft) - yCalibration) > DRIVE_THRESHOLD? -xboxDriver.getY(Hand.kLeft) : 0;
-        double zAxis = Math.abs(xboxDriver.getX(Hand.kRight) - zCalibration) > DRIVE_THRESHOLD? xboxDriver.getX(Hand.kRight) : 0;
+    public void enabledUpdate(DriveTrain driveTrain, HatchIntake hatchIntake, CargoIntake cargoIntake,
+        Climber climber, Elevator elevator, VisionHandler visionHandler) {
 
-        dt.driveCartesian(xAxis, -yAxis, zAxis);
+        if(useVisionRecognition.get()) {
+            visionHandler.updateVisionTarget();
+            visionHandler.update(driveTrain);
+        } else {
+            double xAxis = Math.abs(xboxDriver.getX(Hand.kLeft) - xCalibration) > DRIVE_THRESHOLD? xboxDriver.getX(Hand.kLeft) : 0;
+            double yAxis = Math.abs(xboxDriver.getY(Hand.kLeft) - yCalibration) > DRIVE_THRESHOLD? -xboxDriver.getY(Hand.kLeft) : 0;
+            double zAxis = Math.abs(xboxDriver.getX(Hand.kRight) - zCalibration) > DRIVE_THRESHOLD? xboxDriver.getX(Hand.kRight) : 0;
+    
+            driveTrain.driveCartesian(xAxis, -yAxis, zAxis);
+        }
+
 
         if(xboxDriver.getXButton())
-            ci.spinIntake(0.5);
+            cargoIntake.spinIntake(0.5);
         else if(xboxDriver.getAButton())
-            ci.spinIntake(-1);
+            cargoIntake.spinIntake(-1);
         else
-            ci.spinIntake(0);
+            cargoIntake.spinIntake(0);
 
         if (xboxDriver.getBackButtonPressed()) //Button for turning compressor on or off is X
         {
-            hi.compressorOnorOff();
+            hatchIntake.compressorOnorOff();
         }
 
         if (xboxDriver.getBButtonPressed())
-            ci.toggleLift();
+            cargoIntake.toggleLift();
 
         if(xboxDriver.getPOV() == 0)
-            el.lift(1);
+            elevator.lift(1);
         else if(xboxDriver.getPOV() == 180)
-            el.lift(-1);
+            elevator.lift(-1);
         else
-            el.lift(0);
+            elevator.lift(0);
 
         if(xboxDriver.getBumperPressed(Hand.kLeft))
-            ci.toggleLift();
+            cargoIntake.toggleLift();
     }
 
     public void printJoystickInfo() {

@@ -10,6 +10,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.TimedRobot;
 import frc.handlers.AutonHandler;
 import frc.handlers.JoystickHandler;
+import frc.handlers.VisionHandler;
 import frc.subsystems.DriveTrain;
 import frc.subsystems.*;
 
@@ -22,14 +23,15 @@ import frc.subsystems.*;
  */
 public class Robot extends TimedRobot {
   // Subsystems
-  private final JoystickHandler controls = new JoystickHandler();
   private final DriveTrain driveTrain = new DriveTrain();
-  private final AutonHandler autonHandler = new AutonHandler(driveTrain);
   private final HatchIntake hatchIntake = new HatchIntake();
   private final CargoIntake cargoIntake = new CargoIntake();
   private final Climber climber = new Climber();
   private final Elevator elevator = new Elevator();
-  
+
+  private final JoystickHandler controls = new JoystickHandler();
+  private final AutonHandler autonHandler = new AutonHandler(driveTrain);
+  private final VisionHandler visionHandler = new VisionHandler();
   /**
    * This function is run when the robot is first started up and should be
    * used for any initialization code.
@@ -49,9 +51,10 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
-    // find out how to only run this when the robot is disabled:
-    autonHandler.disabledUpdate();
+    autonHandler.disabledUpdate(); // find out how to only run this when the robot is disabled:
+
     // controls.printJoystickInfo();
+    visionHandler.updateVisionTarget();
   }
 
   /**
@@ -85,7 +88,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
-    controls.enabledUpdate(driveTrain, hatchIntake, cargoIntake, climber, elevator);
+    controls.enabledUpdate(driveTrain, hatchIntake, cargoIntake, climber, elevator, visionHandler);
   }
 
   /**

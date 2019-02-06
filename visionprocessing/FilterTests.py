@@ -1,46 +1,43 @@
 import cv2
 import math
+import numpy as np
 
-def ylevel_test(rect_y, y_thresh):
-    bounds = [y_thresh[0] - y_thresh[1] / 2, y_thresh[0] + y_thresh[1]]
-    return rect_y >= bounds[0] and rect_y <= bounds[1]
+def ylevelTest(rectY, yTresh):
+    bounds = [yTresh[0] - yTresh[1] / 2, yTresh[0] + yTresh[1]]
+    return rectY >= bounds[0] and rectY <= bounds[1]
 
-def solidity_test(contour_area, convex_hull, min_solidity):
-    hull_area = cv2.contourArea(convex_hull)
-    return float(contour_area / hull_area) >= min_solidity
+def solidityTest(contourArea, convexHull, minSolidity):
+    hullArea = cv2.contourArea(convexHull)
+    return float(contourArea / hullArea) >= minSolidity
 
-def area_test(contour_area, area_threshold):
-    return contour_area >= area_threshold[0] and contour_area <= area_threshold[1]
+def quadrilateralTest(contour, tolerance, numSides=4): # numSides can be a different integer to find polygons of alternate side counts (e.g. 5 for pentagon)
+    for epsilon in range(1, tolerance):
+        approx = cv2.approxPolyDP(contour, epsilon, True)
 
-def rectangle_test(rect_width, rect_height, contour_area, tolerance, angle=0):
-    b, h = get_bh(rect_width, rect_height, angle)
+        if len(approx) == numSides:
+            return True
 
-    rect_area = b * h
+    return False
 
-    return math.fabs(contour_area - rect_area) < tolerance
-
-def aspectratio_test(rect_width, rect_height, desired_ratio, tolerance, angle=0): # desired_ratio = width/height, e.g. 4:3 becomes 4/3
-    b, h = get_bh(rect_width, rect_height, angle)
-
-    ratio = b / h
-
-    return math.fabs(ratio - desired_radio) < tolerance
-
-def get_bh(rect_width, rect_height, angle):
-    b = rect_height / math.cos(angle)
-    h = rect_width * math.cos(angle)
-
-    return b, h
+def areaTest(contourArea, minArea):
+    return contourArea > minArea
 
 '''
-There is a mathematical way of doing this, 
-which involves the resolution and fov of the
-camera, and using a known real world distance
-between two pieces of vision tape to determine
-how far you are from it, but I am going to
-instead get a table of values of areas of
-contours and their corresponding distances from
-the camera, and approximate a function from that.
+This is a test specific to the 2019 season. Given eight points
+(the corners of the two vision targets), make sure that the
+points are within a certain radius of where they should be
+if they are actually a vision target.
 '''
-def get_distance(contour_area):
-    pass
+def superStrictTest(rect1, rect2, destPoints, tolerance):
+    for i in range(4):
+        if not withinRadius(rect1[i], destPoints[i], tolerance):
+            return False
+
+    for i in range(4):
+        if not withinRadius(rect2[i], destPoints[4+i], tolerance):
+            return False
+
+    return True
+
+def withinRadius(point, center, radius):
+    return math.sqrt(math.pow(point[0] - center[0], 2) + math.pow(point[1] - center[1], 2)) < radius # distance formula

@@ -27,6 +27,8 @@ public class CargoIntake {
         else
             lift.set(Value.kForward);
 
+        System.out.println("Lift solenoid position: " + lift.get());
+
         lifted = !lifted;
     }
 }

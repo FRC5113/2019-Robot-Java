@@ -2,27 +2,53 @@ package frc.handlers;
 
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import frc.autoncases.PlaceHatchPanel;
+import frc.subsystems.DriveTrain;
 
 public class VisionHandler {
-    private final int X_RESOLUTION;
+    private int X_RESOLUTION;
 
     private NetworkTable nettab;
     private VisionTarget target;
+
+    private PlaceHatchPanel hatchAuton;
     
     public VisionHandler() {
-        nettab = NetworkTableInstance.getDefault().getTable("contoursReport");        
-    
-        X_RESOLUTION = 100; // this will be changed to a resolution that is received from the network table
-        
-        int numTargetsFound = (int) nettab.getEntry("numTargetsFound").getDouble(-1);
-        
-        if(numTargetsFound > 0) {
-            int xCoord = (int) nettab.getEntry("xCoord").getDouble(-1);
-            int area = (int) nettab.getEntry("area").getDouble(-1);
-            int distance = (int) nettab.getEntry("distance").getDouble(-1);
+        nettab = NetworkTableInstance.getDefault().getTable("contoursReport");   
+        X_RESOLUTION = (int) nettab.getEntry("X_RESOLUTION").getDouble(-1);
+        hatchAuton = new PlaceHatchPanel(null);
+    }
 
-            target = new VisionTarget(xCoord, area, numTargetsFound, distance, X_RESOLUTION);
+    public void updateVisionTarget()
+    {
+        if(X_RESOLUTION == -1)
+            X_RESOLUTION = (int) nettab.getEntry("X_RESOLUTION").getDouble(-1);
+        
+        if(nettab.getEntry("targetDetected").getBoolean(false)) {
+            int xCoord = (int) nettab.getEntry("xCoord").getDouble(-1);
+            int distance = (int) nettab.getEntry("distance").getDouble(-1); // in inches
+
+            // would it be better to instead have a method for updating these values, so that I don't
+            // instantiate a new object every loop? Would that make it faster, or is it negligible?
+            target = new VisionTarget(xCoord, distance, X_RESOLUTION);
         } else
-            System.out.println("No targets are found!");
+            target = null;
+    }
+
+    public void update(DriveTrain dt) {
+        hatchAuton.update(dt, target); // implement more vision autons?
+    }
+
+    public String toString() {
+        String str;
+
+        if(target != null)
+            str = String.format("xCoord: %d (/%d)\n" +
+                                   "angle: %d",
+                                   target.getXCoord(), X_RESOLUTION, target.getAngle());
+        else
+            str = "no target";
+            
+        return str;
     }
 }
