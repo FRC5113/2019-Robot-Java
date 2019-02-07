@@ -15,6 +15,8 @@ public class JoystickHandler {
 
     private final JoystickButton useVisionRecognition;
 
+    private final double SPEED = 0.5;
+
     public JoystickHandler() {
         xCalibration = xboxDriver.getX(Hand.kLeft);
         yCalibration = xboxDriver.getY(Hand.kLeft);
@@ -30,11 +32,14 @@ public class JoystickHandler {
             visionHandler.updateVisionTarget();
             visionHandler.update(driveTrain);
         } else {
-            double xAxis = Math.abs(xboxDriver.getX(Hand.kLeft) - xCalibration) > DRIVE_THRESHOLD? xboxDriver.getX(Hand.kLeft) : 0;
-            double yAxis = Math.abs(xboxDriver.getY(Hand.kLeft) - yCalibration) > DRIVE_THRESHOLD? -xboxDriver.getY(Hand.kLeft) : 0;
-            double zAxis = Math.abs(xboxDriver.getX(Hand.kRight) - zCalibration) > DRIVE_THRESHOLD? xboxDriver.getX(Hand.kRight) : 0;
+            double xAxis = Math.abs(xboxDriver.getX(Hand.kLeft) - xCalibration) > DRIVE_THRESHOLD? xboxDriver.getX(Hand.kLeft) * SPEED : 0;
+            double yAxis = Math.abs(xboxDriver.getY(Hand.kLeft) - yCalibration) > DRIVE_THRESHOLD? xboxDriver.getY(Hand.kLeft) * SPEED : 0;
+            double zAxis = Math.abs(xboxDriver.getX(Hand.kRight) - zCalibration) > DRIVE_THRESHOLD? xboxDriver.getX(Hand.kRight) * SPEED : 0;
     
-            driveTrain.driveCartesian(xAxis, -yAxis, zAxis);
+            // if(xboxDriver.getPOV() == 270)
+                driveTrain.driveCartesianFOD(xAxis, yAxis, zAxis);
+            // else
+                // driveTrain.driveCartesian(xAxis, yAxis, zAxis);
         }
 
 
@@ -45,9 +50,9 @@ public class JoystickHandler {
         else
             cargoIntake.spinIntake(0);
 
-        if (xboxDriver.getBackButtonPressed()) //Button for turning compressor on or off is X
-        {
-            hatchIntake.compressorOnorOff();
+        if (xboxDriver.getBackButtonPressed()) { //Button for turning compressor on or off is X
+            hatchIntake.toggleCompressor();
+            System.out.println("toggled to: " + hatchIntake.getCompressor().getClosedLoopControl());
         }
 
         if (xboxDriver.getBButtonPressed())

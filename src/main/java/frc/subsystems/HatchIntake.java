@@ -8,11 +8,12 @@ public class HatchIntake
     private Compressor compressor;
     private Solenoid deployer;
 
-    
     public HatchIntake ()
     {
-        // compressor = new Compressor();
+        compressor = new Compressor();
         // deployer = new Solenoid (0);
+
+        compressor.setClosedLoopControl(true);
     }
 
     public void deploy()
@@ -20,21 +21,13 @@ public class HatchIntake
         
     }
     
-    public Compressor getCompressor ()
+    public Compressor getCompressor()
     {
         return compressor;
     }
 
-    public void compressorOnorOff ()
+    public void toggleCompressor()
     {
-        if (compressor.enabled())
-        {
-            compressor.stop();
-        }
-        else if (!compressor.enabled())
-        {
-            compressor.start();
-        }
+        compressor.setClosedLoopControl(!compressor.getClosedLoopControl());
     }
-
 }
