@@ -249,12 +249,13 @@ while True:
     ######################################################################
 
     ############## Show All Images #######################################
-    cv2.rectangle(frame, (0, int(Y_TEST_THRESH[0] - Y_TEST_THRESH[1] / 2)), (int(RESOLUTION[0]), Y_TEST_THRESH[0] + Y_TEST_THRESH[1]), (0, 255, 255), 2)
+    if CONFIG['DISPLAY']:
+        cv2.rectangle(frame, (0, int(Y_TEST_THRESH[0] - Y_TEST_THRESH[1] / 2)), (int(RESOLUTION[0]), Y_TEST_THRESH[0] + Y_TEST_THRESH[1]), (0, 255, 255), 2)
 
-    #cv2.imshow('thresholded', thresholdedImage)
-    #cv2.imshow('dilated', dilatedImage)
-    #cv2.imshow('contours', frame)
-    #cv2.imshow('unmodified', unmodified)
+        cv2.imshow('thresholded', thresholdedImage)
+        cv2.imshow('dilated', dilatedImage)
+        cv2.imshow('contours', frame)
+        cv2.imshow('unmodified', unmodified)
     ######################################################################
 
     print('========================================================')

@@ -14,8 +14,8 @@ public class Elevator
     private PIDController elevatorPID = new PIDController(0.5, 0, 0, controller, controller); // this is most likely wrong
     
     public enum Level {
-        ONE(0), TWO(0), THREE(0);
-
+        ONE(0), TWO(0), THREE(0); // these are the enocder values that correspond
+                                    // to the different rocket levels
         public int encoderValue;
 
         private Level(int encoderValue) {

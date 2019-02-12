@@ -13,28 +13,24 @@ public class JoystickHandler {
     private final double DRIVE_THRESHOLD = 0.1;
     private final double xCalibration, yCalibration, zCalibration;
 
-    private final JoystickButton useVisionRecognition;
-
     private final double SPEED = 0.5;
-
-    private long initHatchDeploy = 0;
 
     public JoystickHandler() {
         xCalibration = xboxDriver.getX(Hand.kLeft);
         yCalibration = xboxDriver.getY(Hand.kLeft);
         zCalibration = xboxDriver.getX(Hand.kRight);
-
-        useVisionRecognition = new JoystickButton(driverStick, 8);
     }
 
+    // This method gets called every 20 milliseconds in teleopPeriodic,
+    // and handles all of the teleop controls of the bot.
     public void enabledUpdate(DriveTrain driveTrain, HatchIntake hatchIntake, CargoIntake cargoIntake,
         Climber climber, Elevator elevator, VisionHandler visionHandler) {
 
         // Driving
 
-        if(useVisionRecognition.get() || xboxDriver.getPOV() == 90) {
+        if(xboxDriver.getPOV() == 90) {
             visionHandler.updateVisionTarget();
-            visionHandler.placeHatchPanel(driveTrain);
+            visionHandler.placeHatchPanel(driveTrain, hatchIntake);
         } else {
             double xAxis = Math.abs(xboxDriver.getX(Hand.kLeft) - xCalibration) > DRIVE_THRESHOLD? xboxDriver.getX(Hand.kLeft) * SPEED : 0;
             double yAxis = Math.abs(xboxDriver.getY(Hand.kLeft) - yCalibration) > DRIVE_THRESHOLD? xboxDriver.getY(Hand.kLeft) * SPEED : 0;
@@ -49,6 +45,7 @@ public class JoystickHandler {
         // Cargo
 
         if(xboxDriver.getXButton())
+
             cargoIntake.spinIntake(0.5);
         else if(xboxDriver.getAButton())
             cargoIntake.spinIntake(-1);
@@ -61,19 +58,14 @@ public class JoystickHandler {
         // Hatch
 
         if (xboxDriver.getYButtonPressed()) {
-            hatchIntake.set(true);
-            initHatchDeploy = System.currentTimeMillis();
-        }
-
-        if (hatchIntake.get() && (System.currentTimeMillis() - 500) >= initHatchDeploy){
-            hatchIntake.set(false);
+            hatchIntake.deploy();
         }
 
         if(xboxDriver.getBackButtonPressed())
             hatchIntake.toggleCompressor();
 
         // Elevator
-        
+
         if(xboxDriver.getPOV() == 0)
             elevator.lift(1);
         else if(xboxDriver.getPOV() == 180)

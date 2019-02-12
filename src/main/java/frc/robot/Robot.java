@@ -29,9 +29,11 @@ public class Robot extends TimedRobot {
   private final Climber climber = new Climber();
   private final Elevator elevator = new Elevator();
 
+  // Handlers
   private final JoystickHandler controls = new JoystickHandler();
   private final AutonHandler autonHandler = new AutonHandler(driveTrain);
   private final VisionHandler visionHandler = new VisionHandler();
+
   /**
    * This function is run when the robot is first started up and should be
    * used for any initialization code.
@@ -55,7 +57,6 @@ public class Robot extends TimedRobot {
 
     // controls.printJoystickInfo();
     // driveTrain.printGyroAngle();
-    visionHandler.updateVisionTarget();
     visionHandler.printVisionInfo();
   }
 
@@ -90,7 +91,10 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
+    // controls.enabledUpdate handles all controls
     controls.enabledUpdate(driveTrain, hatchIntake, cargoIntake, climber, elevator, visionHandler);
+
+    hatchIntake.retractIfExtended(); // if the hatch was ever extende for any reason, this will retract it after a given duration.
   }
 
   /**

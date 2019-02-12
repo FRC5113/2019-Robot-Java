@@ -4,32 +4,26 @@ import edu.wpi.first.wpilibj.Solenoid;
 
 public class Climber
 {
-    private Solenoid front;
-    private Solenoid back;
+    private Solenoid front; // = new Solenoid (3);
+    private Solenoid back; // = new Solenoid (4);
 
-    public Climber ()
-    {
-        // front = new Solenoid (3);
-        // back = new Solenoid (4);
+    public Climber() {
+        
     }
 
-    public void setFront(boolean isExtended)
-    {
+    public void setFront(boolean isExtended) {
         front.set(isExtended);
     }
 
-    public void setBack(boolean isExtended)
-    {
+    public void setBack(boolean isExtended) {
         back.set(isExtended);
     }
 
-    public void toggleFront()
-    {
+    public void toggleFront() {
         front.set(!front.get());
     }
 
-    public void toggleBack()
-    {
+    public void toggleBack() {
         back.set(!back.get());
     }
 }

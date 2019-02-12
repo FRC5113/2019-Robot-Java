@@ -11,25 +11,20 @@ public class CargoIntake {
 
     private boolean lifted = false;
 
-    public CargoIntake()
-    {
-        intake.setInverted(true);
-
-        lift.set(Value.kForward);
+    public CargoIntake() {
+        intake.setInverted(true); // we set inverted whenever a motor spins in the wrong direction.
+        lift.set(Value.kForward); // we initialize it as kForward because that is its retraction state and it shouldn't ever be kOff
     }
 
     public void spinIntake(double power) {
         intake.set(power);
     }
 
-    public void toggleLift()
-    {
+    public void toggleLift() {
         if(lifted)
             lift.set(Value.kReverse);
         else
             lift.set(Value.kForward);
-
-        System.out.println("Lift solenoid position: " + lift.get());
 
         lifted = !lifted;
     }

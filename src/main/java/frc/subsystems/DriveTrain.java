@@ -14,7 +14,7 @@ public class DriveTrain {
     private WPI_TalonSRX frontLeft = new WPI_TalonSRX(13), backLeft = new WPI_TalonSRX(12);
     private WPI_TalonSRX frontRight = new WPI_TalonSRX(14), backRight = new WPI_TalonSRX(15);
 
-    private MecanumDrive mecDrive = new MecanumDrive(frontRight, frontLeft, backRight, backLeft);
+    private MecanumDrive mecDrive = new MecanumDrive(frontRight, backLeft, frontRight, backRight);
 
     private AHRS navx = new AHRS(SPI.Port.kMXP);
 
@@ -22,6 +22,9 @@ public class DriveTrain {
     // private PIDController rotationController = new PIDController(Kp, Ki, Kd, source, output);
 
     public DriveTrain() {       
+        // NeutralMode.Brake means that the motor will resist any movement
+        // when the motor controller's power is set to 0
+
         frontRight.setNeutralMode(NeutralMode.Brake);
         frontLeft.setNeutralMode(NeutralMode.Brake);
         backLeft.setNeutralMode(NeutralMode.Brake);
@@ -29,11 +32,14 @@ public class DriveTrain {
     }
 
     public void driveCartesian(double xPower, double yPower, double rotation) {
-        mecDrive.driveCartesian(yPower, xPower, rotation);
+        mecDrive.driveCartesian(xPower, yPower, rotation);
     }
 
+    // FOD means "Field Oriented Drive", which means that regardless of the
+    // orientation of the bot, positive yPower points towards where
+    // the navx's 0 degree is at.
     public void driveCartesianFOD(double xPower, double yPower, double rotation) {
-        mecDrive.driveCartesian(yPower, xPower, rotation, navx.getAngle());
+        mecDrive.driveCartesian(xPower, yPower, rotation, navx.getAngle());
     }
     
     public void drivePolar(double magnitude, double angle, double rotation) {
@@ -55,6 +61,10 @@ public class DriveTrain {
     public boolean rotate(double degrees) {
 
         return false;
+    }
+
+    public void zeroNavX() {
+        navx.zeroYaw();
     }
 
     public void printGyroAngle() {
