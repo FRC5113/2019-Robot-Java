@@ -17,6 +17,8 @@ public class JoystickHandler {
 
     private final double SPEED = 0.5;
 
+    private long initHatchDeploy = 0;
+
     public JoystickHandler() {
         xCalibration = xboxDriver.getX(Hand.kLeft);
         yCalibration = xboxDriver.getY(Hand.kLeft);
@@ -27,6 +29,8 @@ public class JoystickHandler {
 
     public void enabledUpdate(DriveTrain driveTrain, HatchIntake hatchIntake, CargoIntake cargoIntake,
         Climber climber, Elevator elevator, VisionHandler visionHandler) {
+
+        // Driving
 
         if(useVisionRecognition.get() || xboxDriver.getPOV() == 90) {
             visionHandler.updateVisionTarget();
@@ -42,6 +46,7 @@ public class JoystickHandler {
                 driveTrain.driveCartesian(xAxis, yAxis, zAxis);
         }
 
+        // Cargo
 
         if(xboxDriver.getXButton())
             cargoIntake.spinIntake(0.5);
@@ -50,12 +55,25 @@ public class JoystickHandler {
         else
             cargoIntake.spinIntake(0);
 
+        if(xboxDriver.getBButtonPressed())
+            cargoIntake.toggleLift();
+        
+        // Hatch
+
+        if (xboxDriver.getYButtonPressed()) {
+            hatchIntake.set(true);
+            initHatchDeploy = System.currentTimeMillis();
+        }
+
+        if (hatchIntake.get() && (System.currentTimeMillis() - 500) >= initHatchDeploy){
+            hatchIntake.set(false);
+        }
+
         if(xboxDriver.getBackButtonPressed())
             hatchIntake.toggleCompressor();
 
-        if(xboxDriver.getBButtonPressed())
-            cargoIntake.toggleLift();
-
+        // Elevator
+        
         if(xboxDriver.getPOV() == 0)
             elevator.lift(1);
         else if(xboxDriver.getPOV() == 180)
