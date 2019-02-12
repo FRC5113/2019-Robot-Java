@@ -17,6 +17,8 @@ public class JoystickHandler {
 
     private final double SPEED = 0.5;
 
+    private long initHatchDeploy = 0;
+
     public JoystickHandler() {
         xCalibration = xboxDriver.getX(Hand.kLeft);
         yCalibration = xboxDriver.getY(Hand.kLeft);
@@ -37,7 +39,7 @@ public class JoystickHandler {
             double zAxis = Math.abs(xboxDriver.getX(Hand.kRight) - zCalibration) > DRIVE_THRESHOLD? xboxDriver.getX(Hand.kRight) * SPEED : 0;
     
             // if(xboxDriver.getPOV() == 270)
-                driveTrain.driveCartesianFOD(xAxis, yAxis, zAxis);
+                driveTrain.driveCartesian(xAxis, yAxis, zAxis);
             // else
                 // driveTrain.driveCartesian(xAxis, yAxis, zAxis);
         }
@@ -57,6 +59,15 @@ public class JoystickHandler {
 
         if (xboxDriver.getBButtonPressed())
             cargoIntake.toggleLift();
+        
+        if (xboxDriver.getYButtonPressed()) {
+            hatchIntake.set(true);
+            initHatchDeploy = System.currentTimeMillis();
+        }
+
+        if (hatchIntake.get() && (System.currentTimeMillis() - 500) >= initHatchDeploy){
+            hatchIntake.set(false);
+        }
 
         if(xboxDriver.getPOV() == 0)
             elevator.lift(1);
