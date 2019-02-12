@@ -14,6 +14,8 @@ public class CargoIntake {
     public CargoIntake()
     {
         intake.setInverted(true);
+
+        lift.set(Value.kForward);
     }
 
     public void spinIntake(double power) {

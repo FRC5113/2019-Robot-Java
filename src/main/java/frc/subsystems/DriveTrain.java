@@ -2,11 +2,10 @@ package frc.subsystems;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 
-//import static org.junit.Assume.assumeTrue;
-
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
 import frc.autoncases.Direction;
@@ -18,6 +17,9 @@ public class DriveTrain {
     private MecanumDrive mecDrive = new MecanumDrive(frontRight, frontLeft, backRight, backLeft);
 
     private AHRS navx = new AHRS(SPI.Port.kMXP);
+
+    // private PIDController driveController = new PIDController(0, 0, 0);
+    // private PIDController rotationController = new PIDController(Kp, Ki, Kd, source, output);
 
     public DriveTrain() {       
         frontRight.setNeutralMode(NeutralMode.Brake);
@@ -31,7 +33,7 @@ public class DriveTrain {
     }
 
     public void driveCartesianFOD(double xPower, double yPower, double rotation) {
-        mecDrive.driveCartesian(xPower, yPower, rotation, navx.getAngle());
+        mecDrive.driveCartesian(yPower, xPower, rotation, navx.getAngle());
     }
     
     public void drivePolar(double magnitude, double angle, double rotation) {
@@ -40,6 +42,19 @@ public class DriveTrain {
     
     public void drivePolar(double magnitude, Direction direction, double rotation) {
         drivePolar(magnitude, direction.degrees, rotation);
+    }
+
+    public boolean drivePID(double inches) { // returns whether or not it is finished driving
+        double circumference = 8 * 2 * Math.PI;
+        double revolutions = inches / circumference;
+        double ticks = revolutions * 4096;
+
+        return false;
+    }
+
+    public boolean rotate(double degrees) {
+
+        return false;
     }
 
     public void printGyroAngle() {

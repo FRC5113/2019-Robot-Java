@@ -239,10 +239,12 @@ while True:
     
     if not CONFIG['OFFLINE']:
         if selectedTarget != None:
+            print('target found')
             table.putBoolean('targetDetected', True)
             table.putNumber('xCoord', selectedTarget['x'])
             table.putNumber('angle', selectedTarget['angle'])
         else:
+            print('target not found')
             table.putBoolean('targetDetected', False)
     ######################################################################
 
@@ -251,7 +253,7 @@ while True:
 
     #cv2.imshow('thresholded', thresholdedImage)
     #cv2.imshow('dilated', dilatedImage)
-    cv2.imshow('contours', frame)
+    #cv2.imshow('contours', frame)
     #cv2.imshow('unmodified', unmodified)
     ######################################################################
 

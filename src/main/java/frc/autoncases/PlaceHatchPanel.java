@@ -17,20 +17,21 @@ public class PlaceHatchPanel {
 			System.out.println("No target found!!!!");
 			dt.driveCartesian(0, 0, 0);
 		} else if (target.getAngle() < -ANGLE_TOLERANCE) {
-			dt.driveCartesian(0.3, 0, 0.15);
+			dt.driveCartesian(0.5, -0.1, -0.15);
 		} else if (target.getAngle() > ANGLE_TOLERANCE) {
-			dt.driveCartesian(-0.3, 0, -0.15);
+			dt.driveCartesian(-0.5, -0.1, 0.15);
 		} else {
 			if(true) { // get distance from lidar and make sure it is at least like 15 or something
 				switch(target.getZone()) {
 				case LEFT:
 					dt.drivePolar(0, Direction.LEFT, 0);
-					break;
+					return false;
 				case CENTER:
+					dt.drivePolar(0.5, Direction.FORWARD, 0);
 					return true;
 				case RIGHT:
 					dt.drivePolar(0, Direction.RIGHT, 0);
-					break;
+					return false;
 				}
 			} else {
 				return true;

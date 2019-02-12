@@ -26,29 +26,25 @@ public class VisionHandler {
         
         if(nettab.getEntry("targetDetected").getBoolean(false)) {
             int xCoord = (int) nettab.getEntry("xCoord").getDouble(-1);
-            int distance = (int) nettab.getEntry("distance").getDouble(-1); // in inches
+            int angle = 2 + (int) nettab.getEntry("angle").getDouble(-1); // in inches
 
             // would it be better to instead have a method for updating these values, so that I don't
             // instantiate a new object every loop? Would that make it faster, or is it negligible?
-            target = new VisionTarget(xCoord, distance, X_RESOLUTION);
+            target = new VisionTarget(xCoord, angle, X_RESOLUTION);
         } else
             target = null;
     }
 
-    public void update(DriveTrain dt) {
+    public void placeHatchPanel(DriveTrain dt) {
         hatchAuton.update(dt, target); // implement more vision autons?
     }
 
-    public String toString() {
-        String str;
-
+    public void printVisionInfo() {
         if(target != null)
-            str = String.format("xCoord: %d (/%d)\n" +
-                                   "angle: %d",
+            System.out.printf("xCoord: %d (/%d)\n" +
+                                   "angle: %d\n",
                                    target.getXCoord(), X_RESOLUTION, target.getAngle());
         else
-            str = "no target";
-            
-        return str;
+            System.out.println("no target found");
     }
 }

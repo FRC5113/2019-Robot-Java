@@ -28,18 +28,18 @@ public class JoystickHandler {
     public void enabledUpdate(DriveTrain driveTrain, HatchIntake hatchIntake, CargoIntake cargoIntake,
         Climber climber, Elevator elevator, VisionHandler visionHandler) {
 
-        if(useVisionRecognition.get()) {
+        if(useVisionRecognition.get() || xboxDriver.getPOV() == 90) {
             visionHandler.updateVisionTarget();
-            visionHandler.update(driveTrain);
+            visionHandler.placeHatchPanel(driveTrain);
         } else {
             double xAxis = Math.abs(xboxDriver.getX(Hand.kLeft) - xCalibration) > DRIVE_THRESHOLD? xboxDriver.getX(Hand.kLeft) * SPEED : 0;
             double yAxis = Math.abs(xboxDriver.getY(Hand.kLeft) - yCalibration) > DRIVE_THRESHOLD? xboxDriver.getY(Hand.kLeft) * SPEED : 0;
             double zAxis = Math.abs(xboxDriver.getX(Hand.kRight) - zCalibration) > DRIVE_THRESHOLD? xboxDriver.getX(Hand.kRight) * SPEED : 0;
     
-            // if(xboxDriver.getPOV() == 270)
+            if(xboxDriver.getPOV() == 270)
                 driveTrain.driveCartesianFOD(xAxis, yAxis, zAxis);
-            // else
-                // driveTrain.driveCartesian(xAxis, yAxis, zAxis);
+            else
+                driveTrain.driveCartesian(xAxis, yAxis, zAxis);
         }
 
 
@@ -50,12 +50,10 @@ public class JoystickHandler {
         else
             cargoIntake.spinIntake(0);
 
-        if (xboxDriver.getBackButtonPressed()) { //Button for turning compressor on or off is X
+        if(xboxDriver.getBackButtonPressed())
             hatchIntake.toggleCompressor();
-            System.out.println("toggled to: " + hatchIntake.getCompressor().getClosedLoopControl());
-        }
 
-        if (xboxDriver.getBButtonPressed())
+        if(xboxDriver.getBButtonPressed())
             cargoIntake.toggleLift();
 
         if(xboxDriver.getPOV() == 0)
@@ -64,9 +62,6 @@ public class JoystickHandler {
             elevator.lift(-1);
         else
             elevator.lift(0);
-
-        if(xboxDriver.getBumperPressed(Hand.kLeft))
-            cargoIntake.toggleLift();
     }
 
     public void printJoystickInfo() {
