@@ -12,6 +12,7 @@ public class Elevator
     private WPI_TalonSRX elevator = new WPI_TalonSRX(11);
     private ElevatorController controller = new ElevatorController();
     private PIDController elevatorPID = new PIDController(0.5, 0, 0, controller, controller); // this is most likely wrong
+    private final int ELEVATOR_ENCODER_THRESHOLD = 100;
     
     public enum Level {
         ONE(0), TWO(0), THREE(0); // these are the enocder values that correspond
@@ -30,20 +31,16 @@ public class Elevator
 
         SmartDashboard.putData(elevatorPID);
     }
-
+    
     public void lift(double power) {
         elevator.set(power);
     }
 
     public void liftToLevel(Level level) {
-        switch(level) {
-            case ONE:
-                elevatorPID.pidWrite(elevator.getSelectedSensorPosition());
-                break;
-            case TWO:
-                break;
-            case THREE:
-                break;
-        }
+        elevatorPID.setSetpoint(level.encoderValue);
+
+        // the threshold value was a complete guess. It will need to be adjusted.
+        if(Math.abs(level.encoderValue - elevator.getSelectedSensorPosition()) > ELEVATOR_ENCODER_THRESHOLD)
+            elevatorPID.pidWrite(elevator.getSelectedSensorPosition());
     }
 }

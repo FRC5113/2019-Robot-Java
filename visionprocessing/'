@@ -24,12 +24,13 @@ cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
 
 # Constants
 RESOLUTION = (cap.get(cv2.CAP_PROP_FRAME_WIDTH), cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+RESOLUTION = (640, 360)
 VT_HEIGHT = CONFIG['VT_HEIGHT']
 LOWER_THRESH = np.array(CONFIG['LOWER_THRESH'])
 UPPER_THRESH = np.array(CONFIG['UPPER_THRESH'])
 #LOWER_THRESH = np.array([178, 190, 128])
 #UPPER_THRESH = np.array([246, 247, 242])
-ANGLE_CALIBRATION = CONFIG['ANGLE_CALIBRATION']
+ANGLE_CALIBRATION = 0
 # Contour Test Constants
 Y_TEST_THRESH = CONFIG['Y_TEST_THRESH']
 MIN_SOLIDITY = CONFIG['MIN_SOLIDITY']
@@ -271,7 +272,6 @@ while True:
     timeLength = time.time() - prevTime
     print('{} fps'.format(int(1 / timeLength))) # one frame divided by # of seconds the frame took to process = frames per second
     prevTime = time.time()
-    print(ANGLE_CALIBRATION)
 
     print('========================================================')
 
@@ -282,6 +282,7 @@ while True:
         if selectedTarget != None:
             ANGLE_CALIBRATION += selectedTarget['angle']
             print("    'ANGLE_CALIBRATION': " + str(ANGLE_CALIBRATION))
+            X_OFFSET_CALIBRATION = X_RESOLUTION / 2 - selectedTarget['xCoord']
         print("    'SUPER_STRICT_TEST_POINTS': [")
         print('                    [{}, {}], # top left vertex of leftTarget'.format(int(leftTargetVertices[0][0]), int(leftTargetVertices[0][1])))
         print('                    [{}, {}], # top right vertex of leftTarget'.format(int(leftTargetVertices[1][0]), int(leftTargetVertices[1][1])))

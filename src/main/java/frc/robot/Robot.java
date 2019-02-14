@@ -56,7 +56,9 @@ public class Robot extends TimedRobot {
     autonHandler.disabledUpdate(); // find out how to only run this when the robot is disabled:
 
     // controls.printJoystickInfo();
+    
     // driveTrain.printGyroAngle();
+    visionHandler.updateVisionTarget();
     visionHandler.printVisionInfo();
   }
 

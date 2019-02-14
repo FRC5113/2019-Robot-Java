@@ -14,7 +14,7 @@ public class DriveTrain {
     private WPI_TalonSRX frontLeft = new WPI_TalonSRX(13), backLeft = new WPI_TalonSRX(12);
     private WPI_TalonSRX frontRight = new WPI_TalonSRX(14), backRight = new WPI_TalonSRX(15);
 
-    private MecanumDrive mecDrive = new MecanumDrive(frontRight, backLeft, frontRight, backRight);
+    private MecanumDrive mecDrive = new MecanumDrive(frontLeft, backLeft, frontRight, backRight);
 
     private AHRS navx = new AHRS(SPI.Port.kMXP);
 
