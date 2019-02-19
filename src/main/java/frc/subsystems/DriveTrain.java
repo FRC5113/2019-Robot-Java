@@ -1,5 +1,6 @@
 package frc.subsystems;
 
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 
 //import static org.junit.Assume.assumeTrue;
@@ -9,9 +10,10 @@ import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.PIDController;
-import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import frc.autoncases.Direction;
 
 public class DriveTrain {
@@ -33,14 +35,54 @@ public class DriveTrain {
         frontLeft.setNeutralMode(NeutralMode.Brake);
         backLeft.setNeutralMode(NeutralMode.Brake);
         backRight.setNeutralMode(NeutralMode.Brake);
+
+        //Set the current limits
+        frontRight.configPeakCurrentLimit(80);
+        frontRight.configPeakCurrentDuration(500);
+        frontRight.configContinuousCurrentLimit(60);
+        frontRight.enableCurrentLimit(true);
+
+        frontLeft.configPeakCurrentLimit(80);
+        frontLeft.configPeakCurrentDuration(500);
+        frontLeft.configContinuousCurrentLimit(60);
+        frontLeft.enableCurrentLimit(true);
+
+        backRight.configPeakCurrentLimit(80);
+        backRight.configPeakCurrentDuration(500);
+        backRight.configContinuousCurrentLimit(60);
+        backRight.enableCurrentLimit(true);
+
+        backLeft.configPeakCurrentLimit(80);
+        backLeft.configPeakCurrentDuration(500);
+        backLeft.configContinuousCurrentLimit(60);
+        backLeft.enableCurrentLimit(true); 
+
+        //Setup the encoder
+        frontRight.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
+        frontLeft.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
+        backRight.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
+        backLeft.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
+
+        lidar.startMeasuring();
+
+        ShuffleboardTab SensorTab = Shuffleboard.getTab("Sensors");
+        SensorTab.add("Lidar", lidar);
     }
 
     public void driveCartesian(double xPower, double yPower, double rotation) {
         mecDrive.driveCartesian(yPower, xPower, rotation);
+        //printCurrentDraw();
+        //printEncoderVal();
     }
 
     public void driveCartesianFOD(double xPower, double yPower, double rotation) {
         mecDrive.driveCartesian(xPower, yPower, rotation, navx.getAngle());
+        //printCurrentDraw();
+        //printEncoderVal();
+    }
+
+    public void driveCartesianBackward(double xPower, double yPower, double rotation) {
+        mecDrive.driveCartesian((-1*(xPower)), (-1*(yPower)), rotation);
     }
     
     public void drivePolar(double magnitude, double angle, double rotation) {
@@ -68,5 +110,24 @@ public class DriveTrain {
 
     public void resetNavxAngle() {
         navx.reset();
+    }
+
+    public void printLidarDistance()
+    {
+        System.out.println("Lidar: " + lidar.getDistance());
+    }
+
+    public void printCurrentDraw() {
+        System.out.println("fl: " + frontLeft.getOutputCurrent());
+        System.out.println("bl: " + backLeft.getOutputCurrent());
+        System.out.println("fr: " + frontRight.getOutputCurrent());
+        System.out.println("br: " + backRight.getOutputCurrent()); 
+    }
+
+    public void printEncoderVal() {
+        System.out.println("fl: " + frontLeft.getSelectedSensorVelocity());
+        System.out.println("bl: " + backLeft.getSelectedSensorVelocity());
+        System.out.println("fr: " + (Math.abs(frontRight.getSelectedSensorVelocity())));
+        System.out.println("br: " + (Math.abs(backRight.getSelectedSensorVelocity())));
     }
 }

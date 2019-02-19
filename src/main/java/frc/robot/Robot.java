@@ -7,6 +7,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.TimedRobot;
 import frc.handlers.AutonHandler;
 import frc.handlers.JoystickHandler;
@@ -95,8 +96,14 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     // controls.enabledUpdate handles all controls
     controls.enabledUpdate(driveTrain, hatchIntake, cargoIntake, climber, elevator, visionHandler);
-
+    controls.printJoystickInfo();
     hatchIntake.retractIfExtended(); // if the hatch was ever extende for any reason, this will retract it after a given duration.
+  }
+
+  @Override
+  public void disabledInit()
+  {
+    elevator.reset();
   }
 
   /**

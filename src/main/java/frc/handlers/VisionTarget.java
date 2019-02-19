@@ -1,7 +1,7 @@
 package frc.handlers;
 
 public class VisionTarget {
-	private final int xCoord, angle;
+	private final int xCoord, angle, X_RESOLUTION;
 	private final Zone zone; // the screen is evenly cut into three vertical zones
 
     public enum Zone {
@@ -11,6 +11,7 @@ public class VisionTarget {
 	public VisionTarget(int xCoord, int angle, int X_RESOLUTION) {
 		this.xCoord = xCoord;
 		this.angle = angle;
+		this.X_RESOLUTION = X_RESOLUTION;
 
 		if(xCoord <= X_RESOLUTION * 1.0/7.0)
 			this.zone = Zone.LEFT1;
@@ -39,4 +40,8 @@ public class VisionTarget {
 	public Zone getZone() {
 		return zone;
 	}
+
+	public int getXRes() {
+		return X_RESOLUTION;
+	} 
 }

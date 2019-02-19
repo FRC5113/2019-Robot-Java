@@ -2,12 +2,14 @@ package frc.subsystems;
 
 import java.nio.ByteBuffer;
 
-import edu.wpi.first.wpilibj.I2C.*;
 import edu.wpi.first.wpilibj.I2C;
+import edu.wpi.first.wpilibj.I2C.Port;
 import edu.wpi.first.wpilibj.PIDSource;
 import edu.wpi.first.wpilibj.PIDSourceType;
+import edu.wpi.first.wpilibj.Sendable;
+import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 
-public class LIDARLite implements PIDSource {
+public class LIDARLite implements PIDSource, Sendable {
 
 	private static final byte k_deviceAddress = 0x62;
 
@@ -70,5 +72,35 @@ public class LIDARLite implements PIDSource {
 	@Override
 	public double pidGet() {
 		return getDistance();
+	}
+
+	@Override
+	public String getName()
+	{
+		return "LidarLite";
+	}
+
+	@Override
+	public String getSubsystem()
+	{
+		return "Sensors";
+	}
+
+	@Override
+	public void setName(String name)
+	{}
+
+	@Override 
+	public void setName(String subsystem, String name)
+	{}
+
+	@Override
+	public void setSubsystem(String subsystem) 
+	{}
+
+	@Override
+	public void initSendable(SendableBuilder builder)
+	{
+		builder.addDoubleProperty("Distance", this::getDistance, null);
 	}
 };

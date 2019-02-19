@@ -8,6 +8,7 @@ import frc.subsystems.HatchIntake;
 
 public class VisionHandler {
     private int X_RESOLUTION = 426;
+    private int x;
 
     private NetworkTable nettab;
     private VisionTarget target;
@@ -17,6 +18,7 @@ public class VisionHandler {
     public VisionHandler() {
         // This grabs our table that we wrote to on the RaspberryPi
         nettab = NetworkTableInstance.getDefault().getTable("contoursReport");   
+        target = null;
 
         // The X_RESOLUTION is passed from the RPi so that we know
         // how to split the frame into zones.
@@ -41,16 +43,22 @@ public class VisionHandler {
     }
 
     public void placeHatchPanel(DriveTrain driveTrain, HatchIntake hatchIntake) {
-        updateVisionTarget();
+        updateVisionTarget(); 
         hatchAuton.update(driveTrain, hatchIntake, target); // implement more vision autons?
     }
 
+    public void resetAutonState()
+    {
+        hatchAuton.resetState();
+    }
+
     public void printVisionInfo() {
-        if(target != null)
+        if(target != null){
             System.out.printf("xCoord: %d (/%d)\n" +
                                 "angle: %d\n",
-                                target.getXCoord(), X_RESOLUTION, target.getAngle());
-        else
+                                target.getXCoord(), X_RESOLUTION, target.getAngle());  
+            System.out.println("Target Found!!!!!!!!!!!!");               
+        }else
             System.out.println("no target found");
     }
 }
