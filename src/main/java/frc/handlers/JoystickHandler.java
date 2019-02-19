@@ -11,8 +11,7 @@ import frc.subsystems.Elevator;
 import frc.subsystems.HatchIntake;
 
 public class JoystickHandler {
-    private final Joystick driverStick = new Joystick(0);
-  
+    private final XboxController driverStick = new XboxController(0);
     private final XboxController xboxDriver = new XboxController(1);
 
     private final double DRIVE_THRESHOLD = 0.125;
@@ -75,13 +74,17 @@ public class JoystickHandler {
 
             visionHandler.placeHatchPanel(driveTrain, hatchIntake);
         } else {
-            double xAxis = Math.abs(xboxDriver.getX(Hand.kLeft) - xCalibration) > DRIVE_THRESHOLD? xboxDriver.getX(Hand.kLeft) * SPEED : 0;
-            double yAxis = Math.abs(xboxDriver.getY(Hand.kLeft) - yCalibration) > DRIVE_THRESHOLD? -xboxDriver.getY(Hand.kLeft) * SPEED : 0;
-            double zAxis = Math.abs(xboxDriver.getX(Hand.kRight) - zCalibration) > DRIVE_THRESHOLD? xboxDriver.getX(Hand.kRight) * SPEED : 0;
+            double xAxis = Math.abs(driverStick.getX(Hand.kLeft) - xCalibration) > DRIVE_THRESHOLD? xboxDriver.getX(Hand.kLeft) * SPEED : 0;
+            double yAxis = Math.abs(driverStick.getY(Hand.kLeft) - yCalibration) > DRIVE_THRESHOLD? -xboxDriver.getY(Hand.kLeft) * SPEED : 0;
+            double zAxis = Math.abs(driverStick.getX(Hand.kRight) - zCalibration) > DRIVE_THRESHOLD? xboxDriver.getX(Hand.kRight) * SPEED : 0;
     
             xPIDControl.setSetpoint(xAxis);
             yPIDControl.setSetpoint(yAxis);
             zPIDControl.setSetpoint(zAxis);
+
+            driveTrain.resetNavxAngle();
+
+            //driveTrain.driveStraightConsistent(0);
 
             if(xboxDriver.getPOV() == 270){
                 //driveTrain.driveCartesianFOD(0, 0.25, zAxis);
@@ -91,7 +94,7 @@ public class JoystickHandler {
                 //driveTrain.driveCartesian(0, 0.25, zAxis);
             }
 
-            if(xboxDriver.getStartButtonPressed())
+            if(xboxDriver.getStartButton())
                 driveTrain.driveCartesianBackward(xAxis, yAxis, zAxis);
         }
         oldPOV = xboxDriver.getPOV();

@@ -23,8 +23,6 @@ public class Elevator
 
         private Level(int encoderValue) {
             this.encoderValue = encoderValue;
-
-            
         }
     }
 

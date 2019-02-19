@@ -55,7 +55,7 @@ public class PlaceHatchPanel {
 		rotation.setPercentTolerance(.5);
 		strafation.setPercentTolerance(.5);
 		isItMoving = -1;
-		rotationState = -1;
+		rotationState = -1; // might need to be -2
 		strafationState = -1;
 		
 		strafation.setOutputRange(-0.9, 0.9);
@@ -78,14 +78,14 @@ public class PlaceHatchPanel {
 		// 	System.out.println("rotate right");
 		} else {
 			switch(rotationState) {
-				case -2:
+			case -2:
 				rotation.setSetpoint(0);
 				strafation.setSetpoint((target.getXRes()/2));
 
 				rotationState = -1;
 				System.out.println("State change: " + rotationState);
 				break;
-				case -1:
+			case -1:
 				driveTrain.driveCartesian(strafationOutput.get(), 0, 0/*angleOutput.get()*/);
 				System.out.println("Strafe output " + strafationOutput.get());
 				if(/*rotation.onTarget() && */strafation.onTarget())
@@ -96,7 +96,7 @@ public class PlaceHatchPanel {
 				}
 				break;
 
-				case 0:
+			case 0:
 				driveTrain.driveCartesian(0, pidOutputL.get(), pidOutputN.get());
 				if(completeControllerLidar.onTarget() && completeControllerNav.onTarget())
 				{
@@ -105,7 +105,7 @@ public class PlaceHatchPanel {
 				}
 				break;
 
-				case 1:
+			case 1:
 				break;
 			}
 			/*

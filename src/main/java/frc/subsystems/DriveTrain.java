@@ -94,8 +94,20 @@ public class DriveTrain {
     }
 
     public void driveStraightConsistent(double angle) {
+        completeControllerNav.setSetpoint(0);
+        mecDrive.driveCartesian(-0.3, 0, pidOutputN.get());
+        printEncoderVal();
+    }
+
+    public void driveStrafeConsistent(double angle) {
         completeControllerNav.setSetpoint(angle);
-        mecDrive.driveCartesian(0, 0.5, pidOutputN.get());
+        mecDrive.driveCartesian(0.5, 0, pidOutputN.get());
+    }
+    
+    public void driveConsistent(double x, double y, double angle) {
+        completeControllerNav.setSetpoint(angle);
+        mecDrive.driveCartesian(x, y, pidOutputN.get());
+        //printEncoderVal();
     }
 
     public void driveStraightConsistentDistance(double angle, double distance) {
@@ -125,9 +137,9 @@ public class DriveTrain {
     }
 
     public void printEncoderVal() {
-        System.out.println("fl: " + frontLeft.getSelectedSensorVelocity());
-        System.out.println("bl: " + backLeft.getSelectedSensorVelocity());
-        System.out.println("fr: " + (Math.abs(frontRight.getSelectedSensorVelocity())));
-        System.out.println("br: " + (Math.abs(backRight.getSelectedSensorVelocity())));
+        System.out.println("fl: " + Math.abs(frontLeft.getSelectedSensorVelocity()));
+        System.out.println("bl: " + Math.abs(backLeft.getSelectedSensorVelocity()));
+        System.out.println("fr: " + Math.abs(frontRight.getSelectedSensorVelocity()));
+        System.out.println("br: " + Math.abs(backRight.getSelectedSensorVelocity()));
     }
 }
