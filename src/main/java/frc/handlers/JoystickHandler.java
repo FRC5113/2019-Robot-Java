@@ -67,7 +67,7 @@ public class JoystickHandler {
         Climber climber, Elevator elevator, VisionHandler visionHandler) {
 
         // Driving
-
+        System.out.println("The current POV is: " + xboxDriver.getPOV());
         if(xboxDriver.getPOV() == 270) {
             if (xboxDriver.getPOV() != oldPOV)
                 visionHandler.resetAutonState();
@@ -124,10 +124,12 @@ public class JoystickHandler {
 
         // Elevator
 
-        if(xboxDriver.getBumper(Hand.kRight))
-            elevator.lift(0.8);
+        if(xboxDriver.getBumper(Hand.kRight)){
+            elevator.lift(0.9);
+            System.out.println("hiHere");
+        }
         else if(xboxDriver.getBumper(Hand.kLeft))
-            elevator.lift(-0.6);
+            elevator.lift(-0.2);
         else if(xboxDriver.getPOV() > 180 || xboxDriver.getPOV() < 0)
             elevator.lift(0.1);
 

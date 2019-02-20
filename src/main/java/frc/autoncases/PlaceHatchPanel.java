@@ -51,9 +51,9 @@ public class PlaceHatchPanel {
 
 
 		rotation = new PIDController(0.1, 0, 0, targetAngle, angleOutput);
-		strafation = new PIDController(0.1, 0, 0, targetStrafation, strafationOutput);
-		rotation.setPercentTolerance(.5);
-		strafation.setPercentTolerance(.5);
+		strafation = new PIDController(0.001, 0, 0, targetStrafation, strafationOutput);
+		rotation.setPercentTolerance(5);
+		strafation.setPercentTolerance(5);
 		isItMoving = -1;
 		rotationState = -1; // might need to be -2
 		strafationState = -1;
@@ -67,6 +67,7 @@ public class PlaceHatchPanel {
 
 	// returns whether or not it should have been placed
 	public boolean update(DriveTrain driveTrain, HatchIntake hatchIntake) {		
+		targetStrafation.update(target);
 		if(target == null) {
 			System.out.println("No target found!!!!");
 			driveTrain.driveCartesian(0, 0, 0);

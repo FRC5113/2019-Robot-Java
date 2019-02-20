@@ -8,7 +8,6 @@ import frc.subsystems.HatchIntake;
 
 public class VisionHandler {
     private int X_RESOLUTION = 426;
-    private int x;
 
     private NetworkTable nettab;
     private VisionTarget target;
@@ -38,8 +37,8 @@ public class VisionHandler {
             // would it be better to instead have a method for updating these values, so that I don't
             // instantiate a new object every loop? Would that make it faster, or is it negligible?
             target = new VisionTarget(xCoord, angle, X_RESOLUTION);
-        } else
-            target = null;
+        } else{}
+            //target = null;
     }
 
     public void placeHatchPanel(DriveTrain driveTrain, HatchIntake hatchIntake) {
