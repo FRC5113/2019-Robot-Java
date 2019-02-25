@@ -41,9 +41,9 @@ public class JoystickHandler {
         yPIDControl.setSetpoint(0);
         zPIDControl.setSetpoint(0);
 
-        xPIDControl.enable();
-        yPIDControl.enable();
-        zPIDControl.enable();
+        //xPIDControl.enable();
+        //yPIDControl.enable();
+        //zPIDControl.enable();
 
         oldPOV = -1;
     }
@@ -68,15 +68,15 @@ public class JoystickHandler {
 
         // Driving
         System.out.println("The current POV is: " + xboxDriver.getPOV());
-        if(xboxDriver.getPOV() == 270) {
-            if (xboxDriver.getPOV() != oldPOV)
+        if(driverStick.getPOV() == 270) {
+            if (driverStick.getPOV() != oldPOV)
                 visionHandler.resetAutonState();
 
             visionHandler.placeHatchPanel(driveTrain, hatchIntake);
         } else {
-            double xAxis = Math.abs(driverStick.getX(Hand.kLeft) - xCalibration) > DRIVE_THRESHOLD? xboxDriver.getX(Hand.kLeft) * SPEED : 0;
-            double yAxis = Math.abs(driverStick.getY(Hand.kLeft) - yCalibration) > DRIVE_THRESHOLD? -xboxDriver.getY(Hand.kLeft) * SPEED : 0;
-            double zAxis = Math.abs(driverStick.getX(Hand.kRight) - zCalibration) > DRIVE_THRESHOLD? xboxDriver.getX(Hand.kRight) * SPEED : 0;
+            double xAxis = Math.abs(driverStick.getX(Hand.kLeft) - xCalibration) > DRIVE_THRESHOLD? driverStick.getX(Hand.kLeft) * SPEED : 0;
+            double yAxis = Math.abs(driverStick.getY(Hand.kLeft) - yCalibration) > DRIVE_THRESHOLD? driverStick.getY(Hand.kLeft) * SPEED : 0;
+            double zAxis = Math.abs(driverStick.getX(Hand.kRight) - zCalibration) > DRIVE_THRESHOLD? driverStick.getX(Hand.kRight) * SPEED : 0;
     
             xPIDControl.setSetpoint(xAxis);
             yPIDControl.setSetpoint(yAxis);
@@ -88,13 +88,14 @@ public class JoystickHandler {
 
             if(xboxDriver.getPOV() == 270){
                 //driveTrain.driveCartesianFOD(0, 0.25, zAxis);
-                driveTrain.driveCartesianFOD(xLoop.pidGet() * 1.5, yLoop.pidGet() * -1.5, zLoop.pidGet());
+                //driveTrain.driveCartesianFOD(xLoop.pidGet() * 1.5, yLoop.pidGet() * -1.5, zLoop.pidGet());
             }else{
-                driveTrain.driveCartesian(xLoop.pidGet() * 1.5, yLoop.pidGet() * -1.5, zLoop.pidGet());
-                //driveTrain.driveCartesian(0, 0.25, zAxis);
+                //driveTrain.driveCartesian(xLoop.pidGet() * 1.5, yLoop.pidGet() * -1.5, zLoop.pidGet());
+                
+                driveTrain.driveCartesian(xAxis, yAxis, zAxis);
             }
 
-            if(xboxDriver.getStartButton())
+            if(driverStick.getStartButton())
                 driveTrain.driveCartesianBackward(xAxis, yAxis, zAxis);
         }
         oldPOV = xboxDriver.getPOV();
@@ -123,13 +124,13 @@ public class JoystickHandler {
             hatchIntake.toggleCompressor();
 
         // Elevator
-
+ 
         if(xboxDriver.getBumper(Hand.kRight)){
             elevator.lift(0.9);
             System.out.println("hiHere");
         }
         else if(xboxDriver.getBumper(Hand.kLeft))
-            elevator.lift(-0.2);
+            elevator.lift(-0.5);
         else if(xboxDriver.getPOV() > 180 || xboxDriver.getPOV() < 0)
             elevator.lift(0.1);
 
