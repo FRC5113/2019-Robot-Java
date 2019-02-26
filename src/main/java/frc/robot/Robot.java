@@ -7,13 +7,17 @@
 
 package frc.robot;
 
-import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import frc.handlers.AutonHandler;
 import frc.handlers.JoystickHandler;
 import frc.handlers.VisionHandler;
+import frc.subsystems.CargoIntake;
+import frc.subsystems.Climber;
 import frc.subsystems.DriveTrain;
-import frc.subsystems.*;
+import frc.subsystems.Elevator;
+import frc.subsystems.HatchIntake;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -41,7 +45,8 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
-
+    ShuffleboardTab SensorTab = Shuffleboard.getTab("Sensors");
+    SensorTab.add("Vision Garbage", visionHandler);
   }
 
   /**
@@ -60,7 +65,7 @@ public class Robot extends TimedRobot {
     
     // driveTrain.printGyroAngle();
     visionHandler.updateVisionTarget();
-    visionHandler.printVisionInfo();
+    //visionHandler.printVisionInfo();
   }
 
   /**

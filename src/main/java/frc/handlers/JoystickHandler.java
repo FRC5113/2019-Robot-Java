@@ -11,8 +11,8 @@ import frc.subsystems.Elevator;
 import frc.subsystems.HatchIntake;
 
 public class JoystickHandler {
-    private final XboxController driverStick = new XboxController(0);
-    private final XboxController xboxDriver = new XboxController(1);
+    private final XboxController driverController = new XboxController(0);
+    private final XboxController subsystemController = new XboxController(1);
 
     private final double DRIVE_THRESHOLD = 0.125;
     private final double xCalibration, yCalibration, zCalibration;
@@ -24,10 +24,12 @@ public class JoystickHandler {
 
     private int oldPOV;
 
+    private int oldPOVElevator = -1;
+
     public JoystickHandler() {
-        xCalibration = xboxDriver.getX(Hand.kLeft);
-        yCalibration = xboxDriver.getY(Hand.kLeft);
-        zCalibration = xboxDriver.getX(Hand.kRight);
+        xCalibration = driverController.getX(Hand.kLeft);
+        yCalibration = driverController.getY(Hand.kLeft);
+        zCalibration = driverController.getX(Hand.kRight);
 
         xLoop = new SpeedControlPID(0);
         yLoop = new SpeedControlPID(0);
@@ -67,16 +69,16 @@ public class JoystickHandler {
         Climber climber, Elevator elevator, VisionHandler visionHandler) {
 
         // Driving
-        System.out.println("The current POV is: " + xboxDriver.getPOV());
-        if(driverStick.getPOV() == 270) {
-            if (driverStick.getPOV() != oldPOV)
+        System.out.println("The current POV is: " + subsystemController.getPOV());
+        if(driverController.getPOV() == 270) {
+            if (driverController.getPOV() != oldPOV)
                 visionHandler.resetAutonState();
 
             visionHandler.placeHatchPanel(driveTrain, hatchIntake);
         } else {
-            double xAxis = Math.abs(driverStick.getX(Hand.kLeft) - xCalibration) > DRIVE_THRESHOLD? driverStick.getX(Hand.kLeft) * SPEED : 0;
-            double yAxis = Math.abs(driverStick.getY(Hand.kLeft) - yCalibration) > DRIVE_THRESHOLD? driverStick.getY(Hand.kLeft) * SPEED : 0;
-            double zAxis = Math.abs(driverStick.getX(Hand.kRight) - zCalibration) > DRIVE_THRESHOLD? driverStick.getX(Hand.kRight) * SPEED : 0;
+            double xAxis = Math.abs(driverController.getX(Hand.kLeft) - xCalibration) > DRIVE_THRESHOLD? driverController.getX(Hand.kLeft) * SPEED : 0;
+            double yAxis = Math.abs(driverController.getY(Hand.kLeft) - yCalibration) > DRIVE_THRESHOLD? driverController.getY(Hand.kLeft) * SPEED : 0;
+            double zAxis = Math.abs(driverController.getX(Hand.kRight) - zCalibration) > DRIVE_THRESHOLD? driverController.getX(Hand.kRight) * SPEED : 0;
     
             xPIDControl.setSetpoint(xAxis);
             yPIDControl.setSetpoint(yAxis);
@@ -86,67 +88,87 @@ public class JoystickHandler {
 
             //driveTrain.driveStraightConsistent(0);
 
-            if(xboxDriver.getPOV() == 270){
+            if(subsystemController.getPOV() == 270){
                 //driveTrain.driveCartesianFOD(0, 0.25, zAxis);
                 //driveTrain.driveCartesianFOD(xLoop.pidGet() * 1.5, yLoop.pidGet() * -1.5, zLoop.pidGet());
             }else{
-                //driveTrain.driveCartesian(xLoop.pidGet() * 1.5, yLoop.pidGet() * -1.5, zLoop.pidGet());
+                driveTrain.driveCartesian(xLoop.pidGet() * 1.5, yLoop.pidGet() * -1.5, zLoop.pidGet());
                 
-                driveTrain.driveCartesian(xAxis, yAxis, zAxis);
+                //driveTrain.driveCartesian(xAxis, yAxis, zAxis);
             }
 
-            if(driverStick.getStartButton())
+            if(driverController.getAButton()) // ask BEN
                 driveTrain.driveCartesianBackward(xAxis, yAxis, zAxis);
         }
-        oldPOV = xboxDriver.getPOV();
+        oldPOV = subsystemController.getPOV();
     
         // Cargo
 
         //driveTrain.printLidarDistance();
 
-        if(xboxDriver.getXButton())
+        if(subsystemController.getAButton())
             cargoIntake.spinIntake(0.4);
-        else if(xboxDriver.getAButton())
+        else if(subsystemController.getBButton())
             cargoIntake.spinIntake(-1);
         else
             cargoIntake.spinIntake(0);
 
-        if(xboxDriver.getBButtonPressed())
+        if(subsystemController.getYButtonPressed())
             cargoIntake.toggleLift();
         
         // Hatch
 
-        if (xboxDriver.getYButtonPressed()) {
+        if (subsystemController.getXButtonPressed()) {
             hatchIntake.deploy();
         }
 
-        if(xboxDriver.getBackButtonPressed())
+        if(driverController.getBackButtonPressed())
             hatchIntake.toggleCompressor();
 
+
+        // climber
+
+        if(driverController.getBumper(Hand.kRight)){
+            climber.toggleBack();
+        }
+        else if(subsystemController.getBumper(Hand.kLeft))
+            climber.toggleBack();
         // Elevator
  
-        if(xboxDriver.getBumper(Hand.kRight)){
+        if(subsystemController.getBumper(Hand.kRight)){
             elevator.lift(0.9);
             System.out.println("hiHere");
         }
-        else if(xboxDriver.getBumper(Hand.kLeft))
+        else if(subsystemController.getBumper(Hand.kLeft))
             elevator.lift(-0.5);
-        else if(xboxDriver.getPOV() > 180 || xboxDriver.getPOV() < 0)
+        else if(subsystemController.getPOV() > 180 || subsystemController.getPOV() < 0)
             elevator.lift(0.1);
 
         // Once the PID is written, we use these elevator controls: (I will change the driving dpad controls)
-        if(xboxDriver.getPOV() == 0) // DPAD UP
+        if(subsystemController.getPOV() == 0) { // DPAD UP
+            if(subsystemController.getPOV()!=oldPOVElevator)
+                System.out.print("Changing level to three");
+                oldPOVElevator = 0;
             elevator.liftToLevel(Elevator.Level.THREE);
-        else if(xboxDriver.getPOV() == 90) // DPAD RIGHT
+        }
+        else if(subsystemController.getPOV() == 90) { // DPAD RIGHT
+            if(subsystemController.getPOV()!=oldPOVElevator)
+                System.out.print("Changing level to two");
+                oldPOVElevator = 90;
             elevator.liftToLevel(Elevator.Level.TWO);
-        else if(xboxDriver.getPOV() == 180) // DPAD DOWN
+        }
+        else if(subsystemController.getPOV() == 180) { // DPAD DOWN
+            if(subsystemController.getPOV()!=oldPOVElevator)
+                System.out.print("Changing level to one");
+                oldPOVElevator = 180;
             elevator.liftToLevel(Elevator.Level.ONE);
+        }
     }
 
     public void printJoystickInfo() {
-        double xAxis = Math.abs(xboxDriver.getX(Hand.kLeft) - xCalibration) > DRIVE_THRESHOLD? xboxDriver.getX(Hand.kLeft) * SPEED : 0;
-        double yAxis = Math.abs(xboxDriver.getY(Hand.kLeft) - yCalibration) > DRIVE_THRESHOLD? -xboxDriver.getY(Hand.kLeft) * SPEED : 0;
-        double zAxis = Math.abs(xboxDriver.getX(Hand.kRight) - zCalibration) > DRIVE_THRESHOLD? xboxDriver.getX(Hand.kRight) * SPEED : 0;
+        double xAxis = Math.abs(subsystemController.getX(Hand.kLeft) - xCalibration) > DRIVE_THRESHOLD? subsystemController.getX(Hand.kLeft) * SPEED : 0;
+        double yAxis = Math.abs(subsystemController.getY(Hand.kLeft) - yCalibration) > DRIVE_THRESHOLD? -subsystemController.getY(Hand.kLeft) * SPEED : 0;
+        double zAxis = Math.abs(subsystemController.getX(Hand.kRight) - zCalibration) > DRIVE_THRESHOLD? subsystemController.getX(Hand.kRight) * SPEED : 0;
 
         System.out.printf("(%.2f, %.2f, %.2f)\n", xAxis, yAxis, zAxis);
         

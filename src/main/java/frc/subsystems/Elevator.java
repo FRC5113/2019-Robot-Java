@@ -74,8 +74,11 @@ public class Elevator
         if(!elevatorPID.onTarget())
         {
             System.out.println("Changing height to " + level.encoderValue);
-            elevatorPID.reset();
             elevatorPID.enable();
+        }
+        else{
+            elevatorPID.reset();
+            
         }
 
         elevatorPID.setSetpoint(level.encoderValue);

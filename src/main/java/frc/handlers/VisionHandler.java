@@ -2,11 +2,13 @@ package frc.handlers;
 
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.Sendable;
+import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 import frc.autoncases.PlaceHatchPanel;
 import frc.subsystems.DriveTrain;
 import frc.subsystems.HatchIntake;
 
-public class VisionHandler {
+public class VisionHandler implements Sendable {
     private int X_RESOLUTION = 426;
 
     private NetworkTable nettab;
@@ -60,4 +62,43 @@ public class VisionHandler {
         }else
             System.out.println("no target found");
     }
+
+    public boolean isTarget() {
+        if (target != null) 
+            return false;
+        else
+            return true;
+    }
+
+    @Override
+    public String getName() {
+        return "Vision";
+    }
+
+    @Override
+    public void setName(String name) {
+
+    }
+
+    @Override
+    public String getSubsystem() {
+        return "Info";
+    }
+
+    @Override
+    public void setSubsystem(String subsystem) {
+
+    }
+
+    @Override
+    public void initSendable(SendableBuilder builder) {
+        if (target != null){
+            builder.addDoubleProperty("XCoord", target::getXCoord, null);
+            builder.addDoubleProperty("Angle", target::getAngle, null);
+            builder.addDoubleProperty("XRes", target::getXRes, null);
+            builder.addBooleanProperty("TargetThere", this::isTarget, null);
+        } else {
+            builder.addBooleanProperty("TargetThere", this::isTarget, null);
+        }
+	}
 }
