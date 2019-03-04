@@ -39,7 +39,8 @@ public class PlaceHatchPanel {
     private PIDoutputImp pidOutputL = new PIDoutputImp();
     private LIDARLite lidar = new LIDARLite(I2C.Port.kOnboard);
     private PIDController completeControllerNav = new PIDController(0.1, 0, 0, navx, pidOutputN);
-    private PIDController completeControllerLidar = new PIDController(0.1, 0, 0, lidar, pidOutputL);
+	private PIDController completeControllerLidar = new PIDController(0.1, 0, 0, lidar, pidOutputL);
+	private PlaceHatchPanelSendable sendableHatch;
 
 
 	public PlaceHatchPanel(VisionTarget target) {
@@ -48,6 +49,7 @@ public class PlaceHatchPanel {
 		angleOutput = new PIDoutputImp();
 		targetStrafation = new VisionTargetStrafation(target);
 		strafationOutput = new PIDoutputImp();
+		sendableHatch = new PlaceHatchPanelSendable(this);
 
 
 		rotation = new PIDController(0.1, 0, 0, targetAngle, angleOutput);
@@ -59,6 +61,9 @@ public class PlaceHatchPanel {
 		strafationState = -1;
 		
 		strafation.setOutputRange(-0.9, 0.9);
+
+		ShuffleboardTab MotorTab = Shuffleboard.getTab("State");
+        MotorTab.add("PlaceHatchPanelPID", sendableHatch);
 
 		ShuffleboardTab PIDTab = Shuffleboard.getTab("PID");
 		PIDTab.add("Strafe", strafation);
@@ -162,6 +167,10 @@ public class PlaceHatchPanel {
 	public boolean update(DriveTrain driveTrain, HatchIntake hatchIntake, VisionTarget newTarget) {
 		target = newTarget;
 		return update(driveTrain, hatchIntake);
+	}
+
+	public int getState() {
+		return strafationState;
 	}
 
 	public void resetState()

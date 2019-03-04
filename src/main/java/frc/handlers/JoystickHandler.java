@@ -13,6 +13,7 @@ import frc.subsystems.HatchIntake;
 public class JoystickHandler {
     private final XboxController driverController = new XboxController(0);
     private final XboxController subsystemController = new XboxController(1);
+    //private final XboxController kidController = new XboxController(2);
 
     private final double DRIVE_THRESHOLD = 0.125;
     private final double xCalibration, yCalibration, zCalibration;
@@ -92,9 +93,9 @@ public class JoystickHandler {
                 //driveTrain.driveCartesianFOD(0, 0.25, zAxis);
                 //driveTrain.driveCartesianFOD(xLoop.pidGet() * 1.5, yLoop.pidGet() * -1.5, zLoop.pidGet());
             }else{
-                driveTrain.driveCartesian(xLoop.pidGet() * 1.5, yLoop.pidGet() * -1.5, zLoop.pidGet());
+                //driveTrain.driveCartesian(xLoop.pidGet() * 1.5, yLoop.pidGet() * -1.5, zLoop.pidGet());
                 
-                //driveTrain.driveCartesian(xAxis, yAxis, zAxis);
+                driveTrain.driveCartesian(xAxis*0.99, yAxis*0.99, zAxis*0.99);
             }
 
             if(driverController.getAButton()) // ask BEN
@@ -128,11 +129,11 @@ public class JoystickHandler {
 
         // climber
 
-        if(driverController.getBumper(Hand.kRight)){
-            climber.toggleBack();
+        if(driverController.getBumperPressed(Hand.kRight)){
+//            climber.toggleFront();
         }
-        else if(subsystemController.getBumper(Hand.kLeft))
-            climber.toggleBack();
+        else if(driverController.getBumperPressed(Hand.kLeft))
+//            climber.toggleBack();
         // Elevator
  
         if(subsystemController.getBumper(Hand.kRight)){

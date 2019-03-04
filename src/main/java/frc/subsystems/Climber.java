@@ -5,11 +5,12 @@ import edu.wpi.first.wpilibj.Solenoid;
 
 public class Climber
 {
-    private Solenoid front; // = new Solenoid (3);
-    private Solenoid back; // = new Solenoid (4);
+    private Solenoid front = new Solenoid (4);
+    private Solenoid back = new Solenoid (5);
 
     public Climber() {
-        
+        front.set(false);
+        back.set(false);
     }
 
     public void setFront(boolean isExtended) {

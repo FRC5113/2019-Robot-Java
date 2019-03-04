@@ -42,8 +42,4 @@ public class ElevatorMotorSendable implements Sendable {
     public void initSendable(SendableBuilder builder) {
         builder.addDoubleProperty("Speed", this::getSpeed, null);
 	}
-
-    
-
-
 }
