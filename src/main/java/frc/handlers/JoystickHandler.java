@@ -24,6 +24,7 @@ public class JoystickHandler {
     private SpeedControlPID xLoop, yLoop, zLoop;
 
     private int oldPOV;
+    private boolean driveBackword = false;
 
     private int oldPOVElevator = -1;
 
@@ -47,7 +48,6 @@ public class JoystickHandler {
         //xPIDControl.enable();
         //yPIDControl.enable();
         //zPIDControl.enable();
-
         oldPOV = -1;
     }
 
@@ -70,8 +70,8 @@ public class JoystickHandler {
         Climber climber, Elevator elevator, VisionHandler visionHandler) {
 
         // Driving
-        System.out.println("The current POV is: " + subsystemController.getPOV());
-        if(driverController.getPOV() == 270) {
+        System.out.println("The current POV is: " + driverController.getPOV());
+        if(driverController.getPOV() == 90) {
             if (driverController.getPOV() != oldPOV)
                 visionHandler.resetAutonState();
 
@@ -94,14 +94,17 @@ public class JoystickHandler {
                 //driveTrain.driveCartesianFOD(xLoop.pidGet() * 1.5, yLoop.pidGet() * -1.5, zLoop.pidGet());
             }else{
                 //driveTrain.driveCartesian(xLoop.pidGet() * 1.5, yLoop.pidGet() * -1.5, zLoop.pidGet());
-                
-                driveTrain.driveCartesian(xAxis*0.99, yAxis*0.99, zAxis*0.99);
+                if(driveBackword)
+                    driveTrain.driveCartesian(xAxis*-0.99, yAxis*-0.99, zAxis);
+                else 
+                    driveTrain.driveCartesian(xAxis*0.99, yAxis*0.99, zAxis*0.99);
             }
 
-            if(driverController.getAButton()) // ask BEN
-                driveTrain.driveCartesianBackward(xAxis, yAxis, zAxis);
+            if(driverController.getAButtonPressed())
+                driveBackword = !driveBackword;
+            
         }
-        oldPOV = subsystemController.getPOV();
+        oldPOV = driverController.getPOV();
     
         // Cargo
 
@@ -130,10 +133,10 @@ public class JoystickHandler {
         // climber
 
         if(driverController.getBumperPressed(Hand.kRight)){
-//            climber.toggleFront();
+            climber.toggleFront();
         }
         else if(driverController.getBumperPressed(Hand.kLeft))
-//            climber.toggleBack();
+            climber.toggleBack();
         // Elevator
  
         if(subsystemController.getBumper(Hand.kRight)){
@@ -141,7 +144,7 @@ public class JoystickHandler {
             System.out.println("hiHere");
         }
         else if(subsystemController.getBumper(Hand.kLeft))
-            elevator.lift(-0.5);
+            elevator.lift(-0.9);
         else if(subsystemController.getPOV() > 180 || subsystemController.getPOV() < 0)
             elevator.lift(0.1);
 

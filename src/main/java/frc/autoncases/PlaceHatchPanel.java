@@ -38,8 +38,8 @@ public class PlaceHatchPanel {
 	private PIDoutputImp pidOutputN = new PIDoutputImp();
     private PIDoutputImp pidOutputL = new PIDoutputImp();
     private LIDARLite lidar = new LIDARLite(I2C.Port.kOnboard);
-    private PIDController completeControllerNav = new PIDController(0.1, 0, 0, navx, pidOutputN);
-	private PIDController completeControllerLidar = new PIDController(0.1, 0, 0, lidar, pidOutputL);
+    private PIDController completeControllerNav = new PIDController(0.01, 0, 0, navx, pidOutputN);
+	private PIDController completeControllerLidar = new PIDController(0.005, 0, 0, lidar, pidOutputL);
 	private PlaceHatchPanelSendable sendableHatch;
 
 
@@ -52,15 +52,19 @@ public class PlaceHatchPanel {
 		sendableHatch = new PlaceHatchPanelSendable(this);
 
 
-		rotation = new PIDController(0.1, 0, 0, targetAngle, angleOutput);
-		strafation = new PIDController(0.001, 0, 0, targetStrafation, strafationOutput);
-		rotation.setPercentTolerance(5);
-		strafation.setPercentTolerance(5);
+		rotation = new PIDController(0.01, 0, 0, targetAngle, angleOutput);
+		strafation = new PIDController(0.002, 0.0001, 0, targetStrafation, strafationOutput);
+		rotation.setAbsoluteTolerance(5);
+		strafation.setAbsoluteTolerance(5);
+		completeControllerLidar.setAbsoluteTolerance(5);
+		completeControllerNav.setAbsoluteTolerance(5);
 		isItMoving = -1;
 		rotationState = -1; // might need to be -2
 		strafationState = -1;
 		
 		strafation.setOutputRange(-0.9, 0.9);
+		completeControllerLidar.setOutputRange(-0.9, 0.9);
+		completeControllerNav.setOutputRange(-0.9, 0.9);
 
 		ShuffleboardTab MotorTab = Shuffleboard.getTab("State");
         MotorTab.add("PlaceHatchPanelPID", sendableHatch);
@@ -68,11 +72,11 @@ public class PlaceHatchPanel {
 		ShuffleboardTab PIDTab = Shuffleboard.getTab("PID");
 		PIDTab.add("Strafe", strafation);
 		PIDTab.add("Rotation", rotation);
+		PIDTab.add("Drive", completeControllerLidar);
 	}
 
 	// returns whether or not it should have been placed
 	public boolean update(DriveTrain driveTrain, HatchIntake hatchIntake) {		
-		targetStrafation.update(target);
 		if(target == null) {
 			System.out.println("No target found!!!!");
 			driveTrain.driveCartesian(0, 0, 0);
@@ -83,6 +87,7 @@ public class PlaceHatchPanel {
 		// 	driveTrain.driveCartesian(-0.3, 0, 0.1);
 		// 	System.out.println("rotate right");
 		} else {
+			targetStrafation.update(target);
 			switch(rotationState) {
 			case -2:
 				rotation.setSetpoint(0);
@@ -92,18 +97,27 @@ public class PlaceHatchPanel {
 				System.out.println("State change: " + rotationState);
 				break;
 			case -1:
-				driveTrain.driveCartesian(strafationOutput.get(), 0, 0/*angleOutput.get()*/);
+				driveTrain.driveCartesian(-1.0*strafationOutput.get(), 0, 0/*angleOutput.get()*/);
 				System.out.println("Strafe output " + strafationOutput.get());
-				if(/*rotation.onTarget() && */strafation.onTarget())
+				rotationState = 0;
+				if(/*rotation.onTarget() && strafation.onTarget()*/true)
 				{
 					rotationState = 0;
 					strafation.disable();
+					rotation.disable();
+
+					completeControllerLidar.enable();
+					completeControllerLidar.setSetpoint(150);
+					completeControllerNav.enable();
+					completeControllerNav.setSetpoint(0);
+					navx.reset();
 					System.out.println("State change: " + rotationState);
 				}
 				break;
-
+ 
 			case 0:
-				driveTrain.driveCartesian(0, pidOutputL.get(), pidOutputN.get());
+				driveTrain.driveCartesian(0, pidOutputL.get(), 0/*pidOutputN.get()*/);
+				System.out.println("Drive output " + pidOutputL.get());
 				if(completeControllerLidar.onTarget() && completeControllerNav.onTarget())
 				{
 					rotationState = 1;
@@ -170,12 +184,15 @@ public class PlaceHatchPanel {
 	}
 
 	public int getState() {
-		return strafationState;
+		return rotationState;
 	}
 
 	public void resetState()
 	{
+		rotation.reset();
+		strafation.reset();
 		rotationState = -2;
 		strafation.enable();
+		rotation.enable();
 	}
 } 

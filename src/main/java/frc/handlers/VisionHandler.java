@@ -39,8 +39,8 @@ public class VisionHandler implements Sendable {
             // would it be better to instead have a method for updating these values, so that I don't
             // instantiate a new object every loop? Would that make it faster, or is it negligible?
             target = new VisionTarget(xCoord, angle, X_RESOLUTION);
-        } else{}
-            //target = null;
+        } else
+            target = null;
     }
 
     public void placeHatchPanel(DriveTrain driveTrain, HatchIntake hatchIntake) {
@@ -64,7 +64,7 @@ public class VisionHandler implements Sendable {
     }
 
     public boolean isTarget() {
-        if (target != null) 
+        if (target == null) 
             return false;
         else
             return true;
@@ -90,15 +90,32 @@ public class VisionHandler implements Sendable {
 
     }
 
+    public double getXCoord() {
+        if(target == null)
+            return -1;
+        else
+            return target.getXCoord();
+    }
+
+    public double getAngle() {
+        if(target == null)
+            return -1;
+        else
+            return target.getAngle();
+    }
+
+    public double getXRes() {
+        if(target == null)
+            return -1;
+        else
+            return target.getXRes();
+    }
+
     @Override
     public void initSendable(SendableBuilder builder) {
-        if (target != null){
-            builder.addDoubleProperty("XCoord", target::getXCoord, null);
-            builder.addDoubleProperty("Angle", target::getAngle, null);
-            builder.addDoubleProperty("XRes", target::getXRes, null);
-            builder.addBooleanProperty("TargetThere", this::isTarget, null);
-        } else {
-            builder.addBooleanProperty("TargetThere", this::isTarget, null);
-        }
+        builder.addDoubleProperty("Target_XCoord", this::getXCoord, null);
+        builder.addDoubleProperty("Target_Angle", this::getAngle, null);
+        builder.addDoubleProperty("Target_XRes", this::getXRes, null);
+        builder.addBooleanProperty("TargetThere", this::isTarget, null);
 	}
 }

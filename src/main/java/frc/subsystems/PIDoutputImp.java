@@ -18,7 +18,15 @@ public class PIDoutputImp implements PIDOutput{
     }
 
     public double get() {
-        return power;
+        double ret = 0;
+
+        m_mutex.lock();
+        try
+        {ret = power;}
+        finally
+        {m_mutex.unlock();}
+
+        return ret;
     }
 
     @Override
