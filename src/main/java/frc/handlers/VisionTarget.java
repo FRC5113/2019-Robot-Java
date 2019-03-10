@@ -1,39 +1,34 @@
 package frc.handlers;
 
 public class VisionTarget {
-	private final int xCoord, angle, X_RESOLUTION;
+	public static int X_RESOLUTION;
+	private final int xCoord;
+	private final double angle, strafeError;
 	private final Zone zone; // the screen is evenly cut into three vertical zones
 
     public enum Zone {
-        LEFT1, LEFT2, LEFT3, CENTER, RIGHT3, RIGHT2, RIGHT1;
+        LEFT, CENTER, RIGHT;
     }
 	
-	public VisionTarget(int xCoord, int angle, int X_RESOLUTION) {
+	public VisionTarget(int xCoord, double angle, int X_RESOLUTION) {
 		this.xCoord = xCoord;
 		this.angle = angle;
+		this.strafeError = xCoord - X_RESOLUTION / 2;
 		this.X_RESOLUTION = X_RESOLUTION;
 
-		if(xCoord <= X_RESOLUTION * 1.0/7.0)
-			this.zone = Zone.LEFT1;
-		else if((xCoord >= X_RESOLUTION * 1.0/7.0) && (xCoord <= X_RESOLUTION * 2.0/7.0))
-			this.zone = Zone.LEFT2;
-		else if((xCoord >= X_RESOLUTION * 2.0/7.0) && (xCoord <= X_RESOLUTION * 3.0/7.0))
-			this.zone = Zone.LEFT3;
-		else if((xCoord >= X_RESOLUTION * 3.0/7.0) && (xCoord <= X_RESOLUTION * 4.0/7.0))
-			this.zone = Zone.CENTER;
-		else if((xCoord >= X_RESOLUTION * 4.0/7.0) && (xCoord <= X_RESOLUTION * 5.0/7.0))
-			this.zone = Zone.RIGHT3;
-		else if((xCoord >= X_RESOLUTION * 5.0/7.0) && (xCoord <= X_RESOLUTION * 6.0/7.0))
-			this.zone = Zone.RIGHT2;
+		if(xCoord <= X_RESOLUTION / 3)
+			zone = Zone.LEFT;
+		else if(xCoord >= X_RESOLUTION * 2 / 3)
+			zone = Zone.RIGHT;
 		else
-			this.zone = Zone.RIGHT1;
+			zone = Zone.CENTER;
 	}
 
 	public int getXCoord() {
 		return xCoord;
 	}
 
-	public int getAngle() {
+	public double getAngle() {
 		return angle;
 	}
 

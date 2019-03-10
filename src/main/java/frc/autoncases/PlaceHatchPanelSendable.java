@@ -12,7 +12,7 @@ public class PlaceHatchPanelSendable implements Sendable{
     }
 
     public String getState() {
-        String result = "";
+        String result = "";/*
         switch (hatchPanel.getState()) {
             case -2:
                 result = "Setting the Setpoint: ";
@@ -27,7 +27,7 @@ public class PlaceHatchPanelSendable implements Sendable{
             case 1:
                 result = "Ready to place hatch panel, press Y NOW: ";
                 break;
-        }
+        }*/
         return result;
     }
 

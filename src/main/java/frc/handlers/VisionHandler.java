@@ -34,7 +34,7 @@ public class VisionHandler implements Sendable {
         
         if(nettab.getEntry("targetDetected").getBoolean(false)) {
             int xCoord = (int) nettab.getEntry("xCoord").getDouble(-1);
-            int angle = (int) nettab.getEntry("angle").getDouble(-1);
+            double angle = nettab.getEntry("angle").getDouble(-1);
 
             // would it be better to instead have a method for updating these values, so that I don't
             // instantiate a new object every loop? Would that make it faster, or is it negligible?
@@ -46,11 +46,6 @@ public class VisionHandler implements Sendable {
     public void placeHatchPanel(DriveTrain driveTrain, HatchIntake hatchIntake) {
         updateVisionTarget(); 
         hatchAuton.update(driveTrain, hatchIntake, target); // implement more vision autons?
-    }
-
-    public void resetAutonState()
-    {
-        hatchAuton.resetState();
     }
 
     public void printVisionInfo() {

@@ -28,7 +28,6 @@ public class DriveTrain {
     private LIDARLite lidar = new LIDARLite(I2C.Port.kOnboard);
     private PIDController completeControllerNav = new PIDController(0.5, 0, 0.5, navx, pidOutputN);
     private PIDController completeControllerLidar = new PIDController(0.5, 0, 0.5, lidar, pidOutputL);
-    
 
     public DriveTrain() {       
         frontRight.setNeutralMode(NeutralMode.Brake);

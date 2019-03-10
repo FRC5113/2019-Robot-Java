@@ -25,10 +25,12 @@ public class JoystickHandler {
 
     private int oldPOV;
     private boolean driveBackword = false;
+    private boolean useEndDriving = false;
 
     private int oldPOVElevator = -1;
 
     public JoystickHandler() {
+        
         xCalibration = driverController.getX(Hand.kLeft);
         yCalibration = driverController.getY(Hand.kLeft);
         zCalibration = driverController.getX(Hand.kRight);
@@ -72,18 +74,22 @@ public class JoystickHandler {
         // Driving
         System.out.println("The current POV is: " + driverController.getPOV());
         if(driverController.getPOV() == 90) {
-            if (driverController.getPOV() != oldPOV)
-                visionHandler.resetAutonState();
-
+            visionHandler.updateVisionTarget();
             visionHandler.placeHatchPanel(driveTrain, hatchIntake);
         } else {
             double xAxis = Math.abs(driverController.getX(Hand.kLeft) - xCalibration) > DRIVE_THRESHOLD? driverController.getX(Hand.kLeft) * SPEED : 0;
             double yAxis = Math.abs(driverController.getY(Hand.kLeft) - yCalibration) > DRIVE_THRESHOLD? driverController.getY(Hand.kLeft) * SPEED : 0;
             double zAxis = Math.abs(driverController.getX(Hand.kRight) - zCalibration) > DRIVE_THRESHOLD? driverController.getX(Hand.kRight) * SPEED : 0;
+
+            if(useEndDriving) {
+                xAxis = 0;
+                yAxis /= 2;
+                zAxis = 0;
+            }
     
-            xPIDControl.setSetpoint(xAxis);
-            yPIDControl.setSetpoint(yAxis);
-            zPIDControl.setSetpoint(zAxis);
+            xPIDControl.setSetpoint(1.75 * xAxis);
+            yPIDControl.setSetpoint(1.75 * yAxis);
+            zPIDControl.setSetpoint(1.75 * zAxis);
 
             driveTrain.resetNavxAngle();
 
@@ -95,9 +101,9 @@ public class JoystickHandler {
             }else{
                 //driveTrain.driveCartesian(xLoop.pidGet() * 1.5, yLoop.pidGet() * -1.5, zLoop.pidGet());
                 if(driveBackword)
-                    driveTrain.driveCartesian(xAxis*-0.99, yAxis*-0.99, zAxis);
+                    driveTrain.driveCartesian(xAxis*-1.5, yAxis*-1.5, zAxis*-1.5);
                 else 
-                    driveTrain.driveCartesian(xAxis*0.99, yAxis*0.99, zAxis*0.99);
+                    driveTrain.driveCartesian(xAxis*1.5, yAxis*1.5, zAxis*1.5);
             }
 
             if(driverController.getAButtonPressed())
@@ -105,15 +111,18 @@ public class JoystickHandler {
             
         }
         oldPOV = driverController.getPOV();
+
+        if(driverController.getBButtonPressed())
+            useEndDriving = !useEndDriving;
     
         // Cargo
 
         //driveTrain.printLidarDistance();
 
         if(subsystemController.getAButton())
-            cargoIntake.spinIntake(0.4);
+            cargoIntake.spinIntake(-0.4);
         else if(subsystemController.getBButton())
-            cargoIntake.spinIntake(-1);
+            cargoIntake.spinIntake(0.6);
         else
             cargoIntake.spinIntake(0);
 
@@ -146,7 +155,7 @@ public class JoystickHandler {
         else if(subsystemController.getBumper(Hand.kLeft))
             elevator.lift(-0.9);
         else if(subsystemController.getPOV() > 180 || subsystemController.getPOV() < 0)
-            elevator.lift(0.1);
+            elevator.lift(0.05);
 
         // Once the PID is written, we use these elevator controls: (I will change the driving dpad controls)
         if(subsystemController.getPOV() == 0) { // DPAD UP
@@ -167,6 +176,11 @@ public class JoystickHandler {
                 oldPOVElevator = 180;
             elevator.liftToLevel(Elevator.Level.ONE);
         }
+
+        if(driverController.getYButtonPressed())
+            elevator.toggleCamera();
+        
+        System.out.println(elevator.getAngle());
     }
 
     public void printJoystickInfo() {

@@ -8,6 +8,10 @@ public class VisionTargetAngle implements PIDSource {
 
     private VisionTarget target;
 
+	public void update(VisionTarget target) {
+		this.target = target;
+	}
+
     public VisionTargetAngle(VisionTarget target) {
         this.target = target;
     }

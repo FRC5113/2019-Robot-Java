@@ -7,7 +7,9 @@
 
 package frc.robot;
 
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import frc.handlers.AutonHandler;
@@ -47,6 +49,8 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     ShuffleboardTab SensorTab = Shuffleboard.getTab("Sensors");
     SensorTab.add("Vision Garbage", visionHandler);
+
+    CameraServer.getInstance().startAutomaticCapture();
   }
 
   /**
@@ -91,7 +95,11 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousPeriodic() {
-    autonHandler.enabledUpdate();
+    // autonHandler.enabledUpdate();
+    controls.enabledUpdate(driveTrain, hatchIntake, cargoIntake, climber, elevator, visionHandler);
+    controls.printJoystickInfo();
+    hatchIntake.retractIfExtended();
+    // Scheduler.getInstance().run();
   }
 
   /**

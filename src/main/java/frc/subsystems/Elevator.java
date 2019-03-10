@@ -5,12 +5,14 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.wpilibj.PIDController;
+import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 
 public class Elevator 
 {
     private WPI_TalonSRX elevator = new WPI_TalonSRX(11);
+    private Servo cameraServo = new Servo(9);
     private ElevatorMotorSendable elevatorMotorSendable = new ElevatorMotorSendable(elevator);
     private final ElevatorEncoder elevatorEncoder = new ElevatorEncoder(elevator);
     private PIDController elevatorPID = new PIDController(0.004, 0, 0.001, elevatorEncoder, elevator); // this is most likely wrong: MAX OF .05
@@ -82,5 +84,16 @@ public class Elevator
         }
 
         elevatorPID.setSetpoint(level.encoderValue);
+    }
+
+    public void toggleCamera() {
+        if(cameraServo.get() < 0.5)
+            cameraServo.set(1);
+        else    
+            cameraServo.set(0);
+    }
+
+    public double getAngle() {
+        return cameraServo.get();
     }
 }

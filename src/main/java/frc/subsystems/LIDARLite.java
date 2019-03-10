@@ -52,7 +52,7 @@ public class LIDARLite implements PIDSource, Sendable {
 		retVal = m_buffer.getShort(0);
 
 		if(retVal > 400 || retVal <= 1)
-			retVal = 400;
+			retVal = 0;
 
 		return retVal;
 	}
