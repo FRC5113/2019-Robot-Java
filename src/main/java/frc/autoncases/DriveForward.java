@@ -2,7 +2,7 @@ package frc.autoncases;
 
 import frc.subsystems.DriveTrain;
 
-public class DriveForward {    
+public class DriveForward {    //auton/vision test code
     public void update(DriveTrain dt, int inches) {
         double circumference = 8 * 2 * Math.PI;
         double revolutions = inches / circumference;

@@ -7,11 +7,15 @@
 
 package frc.robot;
 
+import edu.wpi.cscore.UsbCamera;
+import edu.wpi.cscore.VideoSink;
+import edu.wpi.cscore.VideoSource;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.handlers.AutonHandler;
 import frc.handlers.JoystickHandler;
 import frc.handlers.VisionHandler;
@@ -40,18 +44,24 @@ public class Robot extends TimedRobot {
   private final JoystickHandler controls = new JoystickHandler();
   private final AutonHandler autonHandler = new AutonHandler(driveTrain);
   private final VisionHandler visionHandler = new VisionHandler();
-
+  
+  //Variables
+  private UsbCamera camera1;
+  private UsbCamera camera2;
+  private VideoSink server;
   /**
    * This function is run when the robot is first started up and should be
    * used for any initialization code.
    */
   @Override
   public void robotInit() {
-    ShuffleboardTab SensorTab = Shuffleboard.getTab("Sensors");
-    SensorTab.add("Vision Garbage", visionHandler);
-
-    CameraServer.getInstance().startAutomaticCapture();
-  }
+      ShuffleboardTab SensorTab = Shuffleboard.getTab("Sensors");
+      SensorTab.add("Vision Garbage", visionHandler);
+      camera1 = CameraServer.getInstance().startAutomaticCapture(0);
+      camera2 = CameraServer.getInstance().startAutomaticCapture(1);
+      camera1.setFPS(20);
+      camera2.setFPS(20);
+    }
 
   /**
    * This function is called every robot packet, no matter the mode. Use
@@ -64,12 +74,9 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
     autonHandler.disabledUpdate(); // find out how to only run this when the robot is disabled:
-
-    // controls.printJoystickInfo();
-    
-    // driveTrain.printGyroAngle();
     visionHandler.updateVisionTarget();
-    //visionHandler.printVisionInfo();
+    //SmartDashboard.putBoolean("Reverse", controls.driveState());
+    SmartDashboard.updateValues();
   }
 
   /**
@@ -98,7 +105,7 @@ public class Robot extends TimedRobot {
     // autonHandler.enabledUpdate();
     controls.enabledUpdate(driveTrain, hatchIntake, cargoIntake, climber, elevator, visionHandler);
     controls.printJoystickInfo();
-    hatchIntake.retractIfExtended();
+  //  hatchIntake.retractIfExtended();
     // Scheduler.getInstance().run();
   }
 
@@ -110,7 +117,8 @@ public class Robot extends TimedRobot {
     // controls.enabledUpdate handles all controls
     controls.enabledUpdate(driveTrain, hatchIntake, cargoIntake, climber, elevator, visionHandler);
     controls.printJoystickInfo();
-    hatchIntake.retractIfExtended(); // if the hatch was ever extende for any reason, this will retract it after a given duration.
+
+  //  hatchIntake.retractIfExtended(); // if the hatch was ever extende for any reason, this will retract it after a given duration.
   }
 
   @Override

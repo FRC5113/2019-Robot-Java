@@ -22,7 +22,7 @@ public class AutonHandler {
     }
 
     public void disabledUpdate() {
-        selectedCase = Case.DRIVE_FORWARD; //.valueOf(autonChooser.getSelected());
+        selectedCase = Case.DRIVE_FORWARD; 
     }
 
     public void enabledUpdate() {

@@ -23,38 +23,14 @@ public class PlaceHatchPanel {
 			System.out.println("No target found!!!!");
 			driveTrain.driveCartesian(0, 0, 0);
 		} else { // target found
-			if(STRAFE_P * strafeError > STRAFE_TOLERANCE) {
+			if(STRAFE_P * strafeError > STRAFE_TOLERANCE)
 				driveTrain.driveCartesian(STRAFE_P * strafeError, 0, 0); // x and y might be flipped
-			} else if(ANGLE_P * angleError > ANGLE_TOLERANCE || Math.abs(strafeError) > VisionTarget.X_RESOLUTION / 5) {
+			else if(ANGLE_P * angleError > ANGLE_TOLERANCE || Math.abs(strafeError) > VisionTarget.X_RESOLUTION / 5)
 				driveTrain.driveCartesian(0, 0, ANGLE_P * angleError);
-			} else if(angleError < ANGLE_TOLERANCE && strafeError < STRAFE_TOLERANCE) {
+			else if(angleError < ANGLE_TOLERANCE && strafeError < STRAFE_TOLERANCE)
 				driveTrain.driveCartesian(0, 0.5, 0); // x and y might be flipped
-			}
 		}
 		
-		/*else if (target.getAngle() < -ANGLE_TOLERANCE) {
-			driveTrain.driveCartesian(0.5, -0.1, -0.15);
-		} else if (target.getAngle() > ANGLE_TOLERANCE) {
-			driveTrain.driveCartesian(-0.5, -0.1, 0.15);
-		} else {
-			if(true) { // get distance from lidar and make sure it is at least like 15 or something
-				switch(target.getZone()) {
-				case LEFT:
-					driveTrain.drivePolar(0, Direction.LEFT, 0);
-					return false;
-				case CENTER:
-					driveTrain.drivePolar(0.5, Direction.FORWARD, 0);
-					return false;
-				case RIGHT:
-					driveTrain.drivePolar(0, Direction.RIGHT, 0);
-					return false;
-				}
-			} else {
-				hatchIntake.deploy();
-				return true;
-			}
-		}*/
-
 		return false;
 	}
 

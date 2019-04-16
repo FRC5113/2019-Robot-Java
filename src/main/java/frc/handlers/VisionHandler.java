@@ -23,15 +23,10 @@ public class VisionHandler implements Sendable {
 
         // The X_RESOLUTION is passed from the RPi so that we know
         // how to split the frame into zones.
-        // X_RESOLUTION = (int) nettab.getEntry("X_RESOLUTION").getDouble(-1);
         hatchAuton = new PlaceHatchPanel(null);
     }
 
-    public void updateVisionTarget() {
-        // System.out.println("Latency Test: " + nettab.getEntry("latency test").getBoolean(false));
-        // if(X_RESOLUTION == -1) // this allows us to only set the resolution once
-        //     X_RESOLUTION = (int) nettab.getEntry("X_RESOLUTION").getDouble(-1);
-        
+    public void updateVisionTarget() {        
         if(nettab.getEntry("targetDetected").getBoolean(false)) {
             int xCoord = (int) nettab.getEntry("xCoord").getDouble(-1);
             double angle = nettab.getEntry("angle").getDouble(-1);

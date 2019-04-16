@@ -61,6 +61,7 @@ public class Elevator
     
     public void lift(double power) {
         elevator.set(power);
+        System.out.print(power);
     }
 
     public void reset()

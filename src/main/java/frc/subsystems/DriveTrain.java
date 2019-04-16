@@ -116,7 +116,7 @@ public class DriveTrain {
     }
 
     public void printGyroAngle() {
-        System.out.println(navx.getAngle());
+//        System.out.println(navx.getAngle());
     }
 
     public void resetNavxAngle() {
@@ -125,20 +125,20 @@ public class DriveTrain {
 
     public void printLidarDistance()
     {
-        System.out.println("Lidar: " + lidar.getDistance());
+//      System.out.println("Lidar: " + lidar.getDistance());
     }
 
     public void printCurrentDraw() {
-        System.out.println("fl: " + frontLeft.getOutputCurrent());
-        System.out.println("bl: " + backLeft.getOutputCurrent());
-        System.out.println("fr: " + frontRight.getOutputCurrent());
-        System.out.println("br: " + backRight.getOutputCurrent()); 
+//        System.out.println("fl: " + frontLeft.getOutputCurrent());
+//        System.out.println("bl: " + backLeft.getOutputCurrent());
+//        System.out.println("fr: " + frontRight.getOutputCurrent());
+//        System.out.println("br: " + backRight.getOutputCurrent()); 
     }
 
     public void printEncoderVal() {
-        System.out.println("fl: " + Math.abs(frontLeft.getSelectedSensorVelocity()));
-        System.out.println("bl: " + Math.abs(backLeft.getSelectedSensorVelocity()));
-        System.out.println("fr: " + Math.abs(frontRight.getSelectedSensorVelocity()));
-        System.out.println("br: " + Math.abs(backRight.getSelectedSensorVelocity()));
+//        System.out.println("fl: " + Math.abs(frontLeft.getSelectedSensorVelocity()));
+//        System.out.println("bl: " + Math.abs(backLeft.getSelectedSensorVelocity()));
+//        System.out.println("fr: " + Math.abs(frontRight.getSelectedSensorVelocity()));
+//        System.out.println("br: " + Math.abs(backRight.getSelectedSensorVelocity()));
     }
 }

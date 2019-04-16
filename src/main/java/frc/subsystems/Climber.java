@@ -1,30 +1,22 @@
 package frc.subsystems;
 
-import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 
 public class Climber
 {
-    private Solenoid front = new Solenoid (4);
-    private Solenoid back = new Solenoid (5);
+    private DoubleSolenoid back = new DoubleSolenoid (0,1);
+    private Boolean extended = false;
 
     public Climber() {
-        front.set(false);
-        back.set(false);
-    }
-
-    public void setFront(boolean isExtended) {
-        front.set(isExtended);
-    }
-
-    public void setBack(boolean isExtended) {
-        back.set(isExtended);
-    }
-
-    public void toggleFront() {
-        front.set(!front.get());
+        back.set(Value.kReverse);
     }
 
     public void toggleBack() {
-        back.set(!back.get());
+        if(extended)
+            back.set(Value.kReverse);
+        else
+            back.set(Value.kForward);
+        extended = !extended;
     }
 }

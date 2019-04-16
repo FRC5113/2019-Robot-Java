@@ -18,7 +18,7 @@ public class VisionTargetAngle implements PIDSource {
 
 	@Override
 	public void setPIDSourceType(PIDSourceType pidSource) {
-        //nothing yahoo
+        //nStub function
 	}
 
 	@Override

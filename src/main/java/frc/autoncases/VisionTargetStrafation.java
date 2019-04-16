@@ -18,7 +18,7 @@ public class VisionTargetStrafation implements PIDSource {
 
 	@Override
 	public void setPIDSourceType(PIDSourceType pidSource) {
-        //nothing yahoo
+        //stub function
 	}
 
 	@Override
